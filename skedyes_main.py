@@ -91,7 +91,7 @@ class getPTCThread(QThread):
                     print "Tuner Test Failed"
                     self.ptc_update_msg("updateTunerTestResult","FAIL",'')
             elif (msg == "stopTunerTest"):
-                    stbTunerTestStop(self,self.telnetcli)
+                    stbStopTunerTest(self,self.telnetcli)
             elif(msg == "startHddTest"):
                 ret = stbPerformHddTest(self,self.telnetcli)
                 if(ret > 0):
@@ -229,6 +229,7 @@ class SkedYesUI(QtGui.QMainWindow):
         self.ui.tunerStopButton.setEnabled(False)
         self.msgQ.put("stopTunerTest")
 
+
     def startHddTest(self):
         self.msgQ.put("startHddTest")
         self.ui.hddStartButton.setEnabled(False)
@@ -334,6 +335,11 @@ class SkedYesUI(QtGui.QMainWindow):
             self.updateFpTestProgress(value, int (msg))
         elif (option == "updateFanTestSpeed"):
             self.updateFanTestSpeed(value)
+        elif (option == "updateTunerTestResult"):
+            self.updateTunerTestResult(value)
+        elif (option == "updateTunerTestProgress"):
+            self.updateTunerTestProgress(value, int (msg))
+
 
     def updateConnectionStatus(self,text):
         connectionstr = "Telnet Connection Status : "
@@ -457,6 +463,20 @@ class SkedYesUI(QtGui.QMainWindow):
         self.ui.statusMsgLabel.setText("LED Test :")
         self.ui.statusMsgLabel.setText(text)
 
+    def updateTunerTestResult(self, text):
+        if(text == "PASS"):
+            self.ui.tunerResult.setStyleSheet("QLabel { background-color : green; color : white; }");
+            self.ui.tunerResult.setText("PASS")
+        elif(text == "FAIL"):
+            self.ui.tunerResult.setStyleSheet("QLabel { background-color : red; color : white; }");
+            self.ui.tunerResult.setText("FAIL")
+
+
+    def updateTunerTestProgress(self,text, value):
+        self.ui.tunerTestProgressBar.setProperty("value",value)
+        self.ui.statusMsgLabel.setText("Tuner Test :")
+        self.ui.statusMsgLabel.setText(text)
+
     def updateFpTestResult(self, text):
         if(text == "PASS"):
             self.ui.fpResult.setStyleSheet("QLabel { background-color : green; color : white; }");
@@ -521,6 +541,60 @@ def stbGetMacAddress( app, tel) :
                 continue
         else :
             continue
+
+def stbPerformTunerTest(app,tel):
+
+    currentProgressbarValue = 20
+    TunerTestProgress = 1
+    tunerPassString = "Decoding sat"
+    tunerFailString = "No channels found"
+    app.ptc_update_msg("updateTunerTestProgress","Test Initiated",str(currentProgressbarValue))
+    tel.telWrite(command_list[TestCommnad.TUNE_TEST])
+    time.sleep(1)
+    currentProgressbarValue = currentProgressbarValue + 20
+    app.ptc_update_msg("updateTunerTestProgress","Test Progress",str(currentProgressbarValue))
+    time.sleep(3)
+    data = tel.telReadSocket(app)
+    #print list(data)
+    match = re.search(tunerPassString,data)
+    if match:
+        currentProgressbarValue = 100
+        app.ptc_update_msg("updateTunerTestProgress","Test Done",str(currentProgressbarValue))
+        return 1
+    else:
+        match1 = re.search(tunerFailString,data)
+        if match1:
+            currentProgressbarValue = 100
+            app.ptc_update_msg("updateTunerTestProgress","Test Done",str(currentProgressbarValue))
+            return 0
+        else:
+            while TunerTestProgress:
+                data = tel.telReadSocket(app)
+                #print list(data)
+                match = re.search(tunerPassString,data)
+                if match:
+                    TunerTestProgress = 0
+                    currentProgressbarValue = 100
+                    app.ptc_update_msg("updateTunerTestProgress","Test Done",str(currentProgressbarValue))
+                    return 1
+                else:
+                    match1 = re.search(tunerFailString,data)
+                    if match1:
+                        currentProgressbarValue = 100
+                        TunerTestProgress = 0
+                        app.ptc_update_msg("updateTunerTestProgress","Test Done",str(currentProgressbarValue))
+                        return 0
+                    else:
+                        currentProgressbarValue = currentProgressbarValue + 20
+                        app.ptc_update_msg("updateTunerTestProgress","Test Progress ",str(currentProgressbarValue))
+                        continue
+
+
+
+
+def stbStopTunerTest(app,tel):
+    tel.telWrite('\x03') #ctrl + c
+    print ("Tuner_Test_Stopped")
 
 
 def stbPerformFanTest(app,tel):
