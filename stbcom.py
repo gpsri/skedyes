@@ -4,8 +4,8 @@ import time
 import select
 from PyQt4 import QtCore, QtGui
 
-HOST = "192.192.192.2"
-#HOST = "192.168.0.240"
+#HOST = "192.192.192.2"
+HOST = "192.168.0.240"
 command_list = []
 
 class TestCommnad:

@@ -12,6 +12,10 @@ import re
 import signal
 from Queue import Queue
 
+class Diseqc:
+    lnbVoltage = 13 # 0 -OFF, 13 = 13Volt 18 = 18V
+    lnb22KhzTone = 0 # 0 -OFF 1 = ON
+
 
 hddmutex = Lock()
 
@@ -63,14 +67,14 @@ def ptc_ui_to_num_options(uioption):
     }. get("default", 99)
 
 class getPTCThread(QThread):
-    def __init__(self,msgQ ,telnetcli, option,value, msg ):
+    def __init__(self,msgQ ,telnetcli, option,value, msg ,diseqcObj):
         QThread.__init__(self)
         self.msgQ = msgQ
         self.option = option
         self.value  = value
         self.msg = msg
         self.telnetcli = telnetcli
-
+        self.diseqcObj = diseqcObj
 
     def __del__(self):
         self.wait()
@@ -83,6 +87,8 @@ class getPTCThread(QThread):
             msg = self.msgQ.get()
             print " %s " % msg
             if(msg == "startTunerTest"):
+
+                stbDiseqcSettings(self,self.telnetcli, self.diseqcObj)
                 ret = stbPerformTunerTest(self,self.telnetcli)
                 if(ret > 0):
                     print "Tuner Test Passed"
@@ -133,6 +139,28 @@ class getPTCThread(QThread):
             elif  (msg == "stopFanTest"):
                  print "stopFanTest"
                  stbStopFanTest(self,self.telnetcli)
+            elif (msg == "startLedTest"):
+                ret = stbPerformLedTest(self,self.telnetcli)
+                if(ret > 0):
+                    print "Led Test Passed"
+                    self.ptc_update_msg("updateLedTestResult","PASS",'')
+                else:
+                    print "Led Test Failed"
+                    self.ptc_update_msg("updateLedTestResult","FAIL",'')
+            elif  (msg == "stopLedTest"):
+                 print "stopLedTest"
+                 stbStopLedTest(self,self.telnetcli)
+            elif (msg == "startFpTest"):
+                ret = stbPerformFpTest(self,self.telnetcli)
+                if(ret > 0):
+                    print "Fp Test Passed"
+                    self.ptc_update_msg("updateFpTestResult","PASS",'')
+                else:
+                    print "Fp Test Failed"
+                    self.ptc_update_msg("updateFpTestResult","FAIL",'')
+            elif  (msg == "stopFpTest"):
+                print "stopFpTest"
+                stbStopFpTest(self,self.telnetcli)
 
             print " %s" % ( time.ctime(time.time()))
             timenow = '%s' % (time.ctime(time.time()))
@@ -176,6 +204,8 @@ class SkedYesUI(QtGui.QMainWindow):
         self.ui.ledStopButton.setEnabled(False)
         self.ui.fpStopButton.setEnabled(False)
 
+        self.diseqcObj = Diseqc()
+
     def disconectTheSTB(self):
         self.telnetcli.telWrite('\x03') #ctrl + c
         self.ptcHandlingThread.stopThread()
@@ -191,7 +221,7 @@ class SkedYesUI(QtGui.QMainWindow):
         option = ""
         value = ""
         msg = ""
-        self.ptcHandlingThread = getPTCThread(self.msgQ, self.telnetcli,option,value,msg)
+        self.ptcHandlingThread = getPTCThread(self.msgQ, self.telnetcli,option,value,msg,self.diseqcObj )
         self.connect(self.ptcHandlingThread, SIGNAL("uiUpdateProcess(QString,QString,QString)"),self.uiUpdateProcess)
         self.ui.disconnectButton.clicked.connect(self.disconectTheSTB)
         self.ptcHandlingThread.start()
@@ -215,9 +245,25 @@ class SkedYesUI(QtGui.QMainWindow):
         self.ui.ledStopButton.clicked.connect(self.stopLedTest)
         self.ui.fpStartButton.clicked.connect(self.startFpTest)
         self.ui.fpStopButton.clicked.connect(self.stopFpTest)
+        self.ui.lnbVoltage13.clicked.connect(self.changeDiseqcSettings)
+        self.ui.lnbVoltage18.clicked.connect(self.changeDiseqcSettings)
+        self.ui.diseqc22Khz.clicked.connect(self.changeDiseqcSettings)
         self.ui.statusMsgLabel.setStyleSheet("QLabel { background-color : black; color : white; }")
 
 
+    def changeDiseqcSettings(self):
+        if(self.ui.lnbVoltage13.isChecked()):
+            self.diseqcObj.lnbVoltage = 13
+            print ("LNB 13V ON")
+        elif(self.ui.lnbVoltage18.isChecked()):
+            print ("LNB 18V ON")
+            self.diseqcObj.lnbVoltage = 18
+        if( self.ui.diseqc22Khz.isChecked()):
+            print ("LNB 22Khz ON")
+            self.diseqcObj.lnb22KhzTone = 1
+        else:
+            print ("LNB 22Khz OFF")
+            self.diseqcObj.lnb22KhzTone = 0
 
     def startTunerTest(self):
         self.msgQ.put("startTunerTest")
@@ -542,6 +588,30 @@ def stbGetMacAddress( app, tel) :
         else :
             continue
 
+
+
+
+def stbDiseqcSettings(app,tel, diseqcObj):
+    print "Diseqc Settings is called "
+    if((diseqcObj.lnb22KhzTone == 1) and (diseqcObj.lnbVoltage == 13 )):
+        tel.telWrite(command_list[TestCommnad.LNB_LOW_22K_ON])
+        time.sleep(1)
+        data = tel.telReadSocket(app)
+    elif((diseqcObj.lnb22KhzTone == 0) and (diseqcObj.lnbVoltage == 13 )):
+        tel.telWrite(command_list[TestCommnad.LNB_LOW_22K_OFF])
+        time.sleep(1)
+        data = tel.telReadSocket(app)
+    elif((diseqcObj.lnb22KhzTone == 1) and (diseqcObj.lnbVoltage == 18 )):
+        tel.telWrite(command_list[TestCommnad.LNB_HIGH_22K_ON])
+        time.sleep(1)
+        data = tel.telReadSocket(app)
+    else:
+        tel.telWrite(command_list[TestCommnad.LNB_HIGH_22K_OFF])
+        time.sleep(1)
+        data = tel.telReadSocket(app)
+
+
+
 def stbPerformTunerTest(app,tel):
 
     currentProgressbarValue = 20
@@ -806,6 +876,85 @@ def stbPerformHddTest(app,tel):
 def stbStopHddTest(app,tel):
     print("HDD test Stopped")
     tel.telWrite('\x03') #ctrl + c
+
+
+def stbPerformLedTest(app,tel):
+    retry = 1
+    retrycnt = 0
+    currentProgressbarValue = 20
+    ledPassString = "LED all on"
+    app.ptc_update_msg("updateLedTestProgress","Test Initiated",str(currentProgressbarValue))
+    command_list[TestCommnad.LED_TEST] = "led 0"
+    tel.telWrite(command_list[TestCommnad.LED_TEST])
+    time.sleep(2)
+    command_list[TestCommnad.LED_TEST] = "led 1"
+    tel.telWrite(command_list[TestCommnad.LED_TEST])
+    data = tel.telReadSocket(app)
+    time.sleep(2)
+    #print list(data)
+    match = re.search(ledPassString,data)
+    if match:
+        currentProgressbarValue = 100
+        app.ptc_update_msg("updateLedTestProgress","Led Test Passed ",str(currentProgressbarValue))
+        return 1
+    else:
+        while retry :
+            data = tel.telReadSocket(app)
+            time.sleep(2)
+            #print list(data)
+            match = re.search(ledPassString,data)
+            if match:
+                retry = 0
+                currentProgressbarValue = 100
+                app.ptc_update_msg("updateLedTestProgress","Led Test Passed ",str(currentProgressbarValue))
+                return 1
+            else:
+                if(retrycnt > 5):
+                    currentProgressbarValue =  currentProgressbarValue + 6
+                    app.ptc_update_msg("updateLedTestProgress","Led Test Failed ",str(currentProgressbarValue))
+                    return 0
+                retrycnt = retrycnt + 1
+                continue
+
+
+
+
+def stbStopLedTest(app,tel):
+    print("Led Test Stopped")
+    command_list[TestCommnad.LED_TEST] = "led 0"
+    tel.telWrite(command_list[TestCommnad.LED_TEST])
+    time.sleep(2)
+
+
+def stbPerformFpTest(app,tel):
+    retry = 1
+    retrycnt = 0
+    currentProgressbarValue = 20
+    fpPassString = "act_gridon"
+    app.ptc_update_msg("updateFpTestProgress","Test Initiated",str(currentProgressbarValue))
+    command_list[TestCommnad.FP_TEST] = "/root/htp/vfd -r -i -x 0"
+    tel.telWrite(command_list[TestCommnad.FP_TEST])
+    time.sleep(2)
+    command_list[TestCommnad.FP_TEST] = "/root/htp/vfd -r -i -x 1"
+    tel.telWrite(command_list[TestCommnad.FP_TEST])
+    data = tel.telReadSocket(app)
+    time.sleep(2)
+    #print list(data)
+    match = re.search(fpPassString,data)
+    if match:
+        currentProgressbarValue = 100
+        app.ptc_update_msg("updateFpTestProgress","FP Test Passed ",str(currentProgressbarValue))
+        return 1
+    else:
+        return 0
+
+
+def stbStopFpTest(app,tel):
+    print("Fp Test Stopped")
+    command_list[TestCommnad.FP_TEST] = "/root/htp/vfd -r -i -x 0"
+    tel.telWrite(command_list[TestCommnad.FP_TEST])
+    time.sleep(2)
+
 
 def forceCloseApp():
     print "App Closed force"
