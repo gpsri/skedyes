@@ -203,6 +203,8 @@ class SkedYesUI(QtGui.QMainWindow):
         self.ui.fanStopButton.setEnabled(False)
         self.ui.ledStopButton.setEnabled(False)
         self.ui.fpStopButton.setEnabled(False)
+        self.ui.irStopButton.setEnabled(False)
+        self.ui.buttonStopButton.setEnabled(False)
 
         self.diseqcObj = Diseqc()
 
@@ -245,6 +247,10 @@ class SkedYesUI(QtGui.QMainWindow):
         self.ui.ledStopButton.clicked.connect(self.stopLedTest)
         self.ui.fpStartButton.clicked.connect(self.startFpTest)
         self.ui.fpStopButton.clicked.connect(self.stopFpTest)
+        self.ui.buttonStartButton.clicked.connect(self.startButtonTest)
+        self.ui.buttonStopButton.clicked.connect(self.stopButtonTest)
+        self.ui.irStartButton.clicked.connect(self.startIrTest)
+        self.ui.irStopButton.clicked.connect(self.stopIrTest)
         self.ui.lnbVoltage13.clicked.connect(self.changeDiseqcSettings)
         self.ui.lnbVoltage18.clicked.connect(self.changeDiseqcSettings)
         self.ui.diseqc22Khz.clicked.connect(self.changeDiseqcSettings)
@@ -275,12 +281,36 @@ class SkedYesUI(QtGui.QMainWindow):
         self.ui.tunerStopButton.setEnabled(False)
         self.msgQ.put("stopTunerTest")
 
+    def startButtonTest(self):
+        self.msgQ.put("startButtonTest")
+        self.ui.buttonStartButton.setEnabled(False)
+        self.ui.buttonResult.setStyleSheet("QLabel { background-color : gray; color : black; }");
+        self.ui.buttonStopButton.setEnabled(True)
+
+    def stopButtonTest(self):
+        self.ui.buttonStartButton.setEnabled(True)
+        self.ui.buttonStopButton.setEnabled(False)
+        self.msgQ.put("stopButtonTest")
+
+
+    def startIrTest(self):
+        self.msgQ.put("startIrTest")
+        self.ui.irStartButton.setEnabled(False)
+        self.ui.irResult.setStyleSheet("QLabel { background-color : gray; color : black; }");
+        self.ui.irStopButton.setEnabled(True)
+
+    def stopIrTest(self):
+        self.ui.irStartButton.setEnabled(True)
+        self.ui.irStopButton.setEnabled(False)
+        self.msgQ.put("stopIrTest")
+
 
     def startHddTest(self):
         self.msgQ.put("startHddTest")
         self.ui.hddStartButton.setEnabled(False)
         self.ui.hddResult.setStyleSheet("QLabel { background-color : gray; color : black; }");
         self.ui.hddStopButton.setEnabled(True)
+
     def stopHddTest(self):
         self.ui.hddStartButton.setEnabled(True)
         self.ui.hddStopButton.setEnabled(False)

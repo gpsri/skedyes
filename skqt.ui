@@ -1541,7 +1541,7 @@
   <widget class="QLabel" name="fanSpeed">
    <property name="geometry">
     <rect>
-     <x>420</x>
+     <x>440</x>
      <y>330</y>
      <width>171</width>
      <height>28</height>
@@ -1564,9 +1564,6 @@
    </property>
    <property name="text">
     <string>FAN: Speed 00000</string>
-   </property>
-   <property name="alignment">
-    <set>Qt::AlignCenter</set>
    </property>
   </widget>
   <widget class="QRadioButton" name="lnbVoltage13">
@@ -1654,6 +1651,264 @@
    </property>
    <property name="autoExclusive">
     <bool>false</bool>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="irStartButton">
+   <property name="geometry">
+    <rect>
+     <x>660</x>
+     <y>450</y>
+     <width>66</width>
+     <height>28</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Start</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="labelIrTest">
+   <property name="geometry">
+    <rect>
+     <x>50</x>
+     <y>450</y>
+     <width>160</width>
+     <height>28</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <weight>75</weight>
+     <bold>true</bold>
+    </font>
+   </property>
+   <property name="focusPolicy">
+    <enum>Qt::ClickFocus</enum>
+   </property>
+   <property name="frameShape">
+    <enum>QFrame::WinPanel</enum>
+   </property>
+   <property name="text">
+    <string>IR Test</string>
+   </property>
+   <property name="margin">
+    <number>4</number>
+   </property>
+   <property name="indent">
+    <number>-1</number>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="irStopButton">
+   <property name="geometry">
+    <rect>
+     <x>760</x>
+     <y>450</y>
+     <width>66</width>
+     <height>28</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Stop</string>
+   </property>
+  </widget>
+  <widget class="QProgressBar" name="irTestProgressbar">
+   <property name="geometry">
+    <rect>
+     <x>230</x>
+     <y>450</y>
+     <width>120</width>
+     <height>28</height>
+    </rect>
+   </property>
+   <property name="value">
+    <number>5</number>
+   </property>
+  </widget>
+  <widget class="QLabel" name="irResult">
+   <property name="geometry">
+    <rect>
+     <x>360</x>
+     <y>450</y>
+     <width>66</width>
+     <height>28</height>
+    </rect>
+   </property>
+   <property name="mouseTracking">
+    <bool>false</bool>
+   </property>
+   <property name="autoFillBackground">
+    <bool>true</bool>
+   </property>
+   <property name="inputMethodHints">
+    <set>Qt::ImhPreferUppercase</set>
+   </property>
+   <property name="frameShape">
+    <enum>QFrame::NoFrame</enum>
+   </property>
+   <property name="frameShadow">
+    <enum>QFrame::Sunken</enum>
+   </property>
+   <property name="text">
+    <string>PASS</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignCenter</set>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="buttonStartButton">
+   <property name="geometry">
+    <rect>
+     <x>660</x>
+     <y>490</y>
+     <width>66</width>
+     <height>28</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Start</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="labelButtonTest">
+   <property name="geometry">
+    <rect>
+     <x>50</x>
+     <y>490</y>
+     <width>160</width>
+     <height>28</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <weight>75</weight>
+     <bold>true</bold>
+    </font>
+   </property>
+   <property name="focusPolicy">
+    <enum>Qt::ClickFocus</enum>
+   </property>
+   <property name="frameShape">
+    <enum>QFrame::WinPanel</enum>
+   </property>
+   <property name="text">
+    <string>Button Test</string>
+   </property>
+   <property name="margin">
+    <number>4</number>
+   </property>
+   <property name="indent">
+    <number>-1</number>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="buttonStopButton">
+   <property name="geometry">
+    <rect>
+     <x>760</x>
+     <y>490</y>
+     <width>66</width>
+     <height>28</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Stop</string>
+   </property>
+  </widget>
+  <widget class="QProgressBar" name="buttonTestProgressbar_3">
+   <property name="geometry">
+    <rect>
+     <x>230</x>
+     <y>490</y>
+     <width>120</width>
+     <height>28</height>
+    </rect>
+   </property>
+   <property name="value">
+    <number>5</number>
+   </property>
+  </widget>
+  <widget class="QLabel" name="buttonResult">
+   <property name="geometry">
+    <rect>
+     <x>360</x>
+     <y>490</y>
+     <width>66</width>
+     <height>28</height>
+    </rect>
+   </property>
+   <property name="mouseTracking">
+    <bool>false</bool>
+   </property>
+   <property name="autoFillBackground">
+    <bool>true</bool>
+   </property>
+   <property name="inputMethodHints">
+    <set>Qt::ImhPreferUppercase</set>
+   </property>
+   <property name="frameShape">
+    <enum>QFrame::NoFrame</enum>
+   </property>
+   <property name="frameShadow">
+    <enum>QFrame::Sunken</enum>
+   </property>
+   <property name="text">
+    <string>PASS</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignCenter</set>
+   </property>
+  </widget>
+  <widget class="QLabel" name="irKeysRecivce">
+   <property name="geometry">
+    <rect>
+     <x>440</x>
+     <y>450</y>
+     <width>171</width>
+     <height>28</height>
+    </rect>
+   </property>
+   <property name="mouseTracking">
+    <bool>false</bool>
+   </property>
+   <property name="autoFillBackground">
+    <bool>true</bool>
+   </property>
+   <property name="inputMethodHints">
+    <set>Qt::ImhPreferUppercase</set>
+   </property>
+   <property name="frameShape">
+    <enum>QFrame::NoFrame</enum>
+   </property>
+   <property name="frameShadow">
+    <enum>QFrame::Sunken</enum>
+   </property>
+   <property name="text">
+    <string>Key:</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="buttonKeysRecivce">
+   <property name="geometry">
+    <rect>
+     <x>440</x>
+     <y>490</y>
+     <width>171</width>
+     <height>28</height>
+    </rect>
+   </property>
+   <property name="mouseTracking">
+    <bool>false</bool>
+   </property>
+   <property name="autoFillBackground">
+    <bool>true</bool>
+   </property>
+   <property name="inputMethodHints">
+    <set>Qt::ImhPreferUppercase</set>
+   </property>
+   <property name="frameShape">
+    <enum>QFrame::NoFrame</enum>
+   </property>
+   <property name="frameShadow">
+    <enum>QFrame::Sunken</enum>
+   </property>
+   <property name="text">
+    <string>Key:</string>
    </property>
   </widget>
  </widget>
