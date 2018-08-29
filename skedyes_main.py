@@ -7,7 +7,7 @@ from stbcom import TestCommnad, SkedTelnet, buildCommandList, command_list
 import socket, select, string, threading, time
 from threading import Thread, Lock
 import xml.etree.ElementTree as ET
-from sklearn import tree
+#from sklearn import tree
 import re
 import signal
 from Queue import Queue
@@ -592,6 +592,7 @@ def stbGetTemperature(appThread,tel):
 def stbGetSoftwareVersion( app, tel) :
     tel.telWrite(command_list[TestCommnad.GET_VER])
     data = tel.telReadSocket(app)
+    print data
     swver = data[(data.find("stb")):]
     swver =  swver.translate(None,'#')
     return swver
