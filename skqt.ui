@@ -1811,7 +1811,7 @@
     <string>Stop</string>
    </property>
   </widget>
-  <widget class="QProgressBar" name="buttonTestProgressbar_3">
+  <widget class="QProgressBar" name="buttonTestProgressbar">
    <property name="geometry">
     <rect>
      <x>230</x>

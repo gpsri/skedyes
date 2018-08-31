@@ -161,10 +161,33 @@ class getPTCThread(QThread):
             elif  (msg == "stopFpTest"):
                 print "stopFpTest"
                 stbStopFpTest(self,self.telnetcli)
+            elif (msg == "startButtonTest"):
+                ret = stbPerformButtonTest(self,self.telnetcli)
+                if(ret > 0):
+                    print "Button Test Passed"
+                    self.ptc_update_msg("updateButtonTestResult","PASS",'')
+                else:
+                    print "Button Test Failed"
+                    self.ptc_update_msg("updateButtonTestResult","FAIL",'')
+            elif  (msg == "stopButtonTest"):
+                print "stopButtonTest"
+                stbStopButtonTest(self,self.telnetcli)
 
-            print " %s" % ( time.ctime(time.time()))
-            timenow = '%s' % (time.ctime(time.time()))
-            self.ptc_update_msg("updateClock",timenow,"")
+            elif (msg == "startIrTest"):
+                ret = stbPerformIrTest(self,self.telnetcli)
+                if(ret > 0):
+                    print "IR Test Passed"
+                    self.ptc_update_msg("updateIrTestResult","PASS",'')
+                else:
+                    print "IR Test Failed"
+                    self.ptc_update_msg("updateIrTestResult","FAIL",'')
+            elif  (msg == "stopIrTest"):
+                print "stopIrTest"
+                stbStopIrTest(self,self.telnetcli)
+
+            #print " %s" % ( time.ctime(time.time()))
+            #timenow = '%s' % (time.ctime(time.time()))
+            #self.ptc_update_msg("updateClock",timenow,"")
             self.sleep(1)
             self.msgQ.task_done()
 
@@ -409,6 +432,14 @@ class SkedYesUI(QtGui.QMainWindow):
             self.updateFpTestResult(value)
         elif (option == "updateFpTestProgress"):
             self.updateFpTestProgress(value, int (msg))
+        elif (option == "updateButtonTestProgress"):
+            self.updateButtonTestProgress(value, int (msg))
+        elif (option == "updateButtonTestResult"):
+            self.updateButtonTestResult(value)
+        elif (option == "updateIrTestProgress"):
+            self.updateIrTestProgress(value, int (msg))
+        elif (option == "updateIrTestResult"):
+            self.updateIrTestResult(value)
         elif (option == "updateFanTestSpeed"):
             self.updateFanTestSpeed(value)
         elif (option == "updateTunerTestResult"):
@@ -506,6 +537,22 @@ class SkedYesUI(QtGui.QMainWindow):
         self.ui.smartcardStartButton.setEnabled(True)
         self.ui.smartcardStopButton.setEnabled(False)
 
+
+    def updateIrTestProgress(self,text, value):
+        self.ui.irTestProgressbar.setProperty("value",value)
+        self.ui.statusMsgLabel.setText("IR Test :")
+        self.ui.statusMsgLabel.setText(text)
+
+    def updateIrTestResult(self, text):
+        if(text == "PASS"):
+            self.ui.irResult.setStyleSheet("QLabel { background-color : green; color : white; }");
+            self.ui.irResult.setText("PASS")
+        elif(text == "FAIL"):
+            self.ui.irResult.setStyleSheet("QLabel { background-color : red; color : white; }");
+            self.ui.irResult.setText("FAIL")
+        self.ui.irStartButton.setEnabled(True)
+        self.ui.irStopButton.setEnabled(False)
+
     def updateFanTestProgress(self,text, value):
         self.ui.fanTestProgressbar.setProperty("value",value)
         self.ui.statusMsgLabel.setText("Fan Test :")
@@ -566,6 +613,25 @@ class SkedYesUI(QtGui.QMainWindow):
     def updateFpTestProgress(self,text, value):
         self.ui.fpTestProgressbar.setProperty("value",value)
         self.ui.statusMsgLabel.setText("FP Test :")
+        self.ui.statusMsgLabel.setText(text)
+
+
+    def updateButtonTestResult(self, text):
+        if(text == "PASS"):
+            self.ui.buttonResult.setStyleSheet("QLabel { background-color : green; color : white; }");
+            self.ui.buttonResult.setText("PASS")
+            Keystr = "Key : "
+            Keystr = Keystr + "Pressed"
+            self.ui.buttonKeysRecivce.setText(Keystr)
+        elif(text == "FAIL"):
+            self.ui.buttonResult.setStyleSheet("QLabel { background-color : red; color : white; }");
+            self.ui.buttonResult.setText("FAIL")
+        self.ui.buttonStartButton.setEnabled(True)
+        self.ui.buttonStopButton.setEnabled(False)
+
+    def updateButtonTestProgress(self,text, value):
+        self.ui.buttonTestProgressbar.setProperty("value",value)
+        self.ui.statusMsgLabel.setText("Button Test :")
         self.ui.statusMsgLabel.setText(text)
 
 
@@ -987,6 +1053,116 @@ def stbStopFpTest(app,tel):
     time.sleep(2)
 
 
+def stbPerformIrTest(app,tel):
+    retry = 1
+    retrycnt = 0
+    currentProgressbarValue = 20
+    irPassString = "IR test: pass"
+    irFailString = "IR test: failed"
+    app.ptc_update_msg("updateIrTestProgress","Test Initiated",str(currentProgressbarValue))
+    tel.telWrite(command_list[TestCommnad.IR_TEST])
+    time.sleep(5)
+    data = tel.telReadSocket(app)
+    #print list(data)
+    match = re.search(irPassString,data)
+    if match:
+        currentProgressbarValue = 100
+        app.ptc_update_msg("updateIrTestProgress","IR Test Passed ",str(currentProgressbarValue))
+        return 1
+    else:
+        match = re.search(irFailString,data)
+        if match:
+            currentProgressbarValue = 100
+            app.ptc_update_msg("updateIrTestProgress","IR Test Failed ",str(currentProgressbarValue))
+            return 0
+        else:
+            while retry :
+                data = tel.telReadSocket(app)
+                time.sleep(2)
+                #print list(data)
+                match = re.search(irPassString,data)
+                if match:
+                    retry = 0
+                    currentProgressbarValue = 100
+                    app.ptc_update_msg("updateIrTestProgress","IR Test Passed ",str(currentProgressbarValue))
+                    return 1
+                else:
+                    match = re.search(irFailString,data)
+                    if match:
+                        currentProgressbarValue = 100
+                        app.ptc_update_msg("updateIrTestProgress","IR Test Failed ",str(currentProgressbarValue))
+                        return 0
+                    elif(retrycnt > 5):
+                        currentProgressbarValue =  currentProgressbarValue + 6
+                        app.ptc_update_msg("updateIrTestProgress","Waiting for IR-Key Press ",str(currentProgressbarValue))
+                        return 0
+                retrycnt = retrycnt + 1
+                continue
+
+
+
+
+def stbStopIrTest(app,tel):
+    print("IR Test Stopped")
+    tel.telWrite(command_list[TestCommnad.STOP_TUNE_TEST]) # ctrl +c to stop
+    time.sleep(2)
+
+def stbPerformButtonTest(app,tel):
+    retry = 1
+    retrycnt = 0
+    currentProgressbarValue = 20
+    buttonPassString = "Button1 pass 1"
+    buttonFailString = "Button1 Failed 0"
+    app.ptc_update_msg("updateButtonTestProgress","Test Initiated",str(currentProgressbarValue))
+    tel.telWrite(command_list[TestCommnad.BUTTON_TEST])
+    time.sleep(2)
+    data = tel.telReadSocket(app)
+    time.sleep(2)
+    #print list(data)
+    match = re.search(buttonPassString,data)
+    if match:
+        currentProgressbarValue = 100
+        app.ptc_update_msg("updateButtonTestProgress","Button Test Passed ",str(currentProgressbarValue))
+        return 1
+    else:
+        match = re.search(buttonFailString,data)
+        if match:
+            currentProgressbarValue = 100
+            app.ptc_update_msg("updateButtonTestProgress","Button Test Failed ",str(currentProgressbarValue))
+            return 0
+        else:
+            while retry :
+                data = tel.telReadSocket(app)
+                time.sleep(2)
+                #print list(data)
+                match = re.search(buttonPassString,data)
+                if match:
+                    retry = 0
+                    currentProgressbarValue = 100
+                    app.ptc_update_msg("updateButtonTestProgress","Button Test Passed ",str(currentProgressbarValue))
+                    return 1
+                else:
+                    match = re.search(buttonFailString,data)
+                    if match:
+                        currentProgressbarValue = 100
+                        app.ptc_update_msg("updateButtonTestProgress","Button Test Failed ",str(currentProgressbarValue))
+                        return 0
+                    elif(retrycnt > 5):
+                        currentProgressbarValue =  currentProgressbarValue + 6
+                        app.ptc_update_msg("updateButtonTestProgress","Waiting for button Press ",str(currentProgressbarValue))
+                        return 0
+                retrycnt = retrycnt + 1
+                continue
+
+
+
+
+def stbStopButtonTest(app,tel):
+    print("Button Test Stopped")
+    tel.telWrite(command_list[TestCommnad.STOP_TUNE_TEST]) # ctrl +c to stop
+    time.sleep(2)
+
+
 def forceCloseApp():
     print "App Closed force"
     exitFlag = 1
@@ -1000,6 +1176,10 @@ except AttributeError:
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
     myapp = SkedYesUI()
+    myapp.setWindowTitle(_translate("SkedYes", "SKED YES V1.1", None))
+
+    timenow = '%s' % (time.ctime(time.time()))
+    myapp.ui.dateAndTime.setText(timenow)
     myapp.show()
     myapp.updateConnectionStatus("Not Connected ")
     '''

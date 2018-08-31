@@ -4,8 +4,9 @@ import time
 import select
 from PyQt4 import QtCore, QtGui
 
-HOST = "192.192.192.2"
+#HOST = "192.192.192.2"
 #HOST = "192.168.0.240"
+HOST = "192.168.77.240"
 command_list = []
 
 class TestCommnad:
@@ -34,7 +35,7 @@ class TestCommnad:
     TUNE_TEST = 22
     STOP_TUNE_TEST = 23
     IR_TEST = 24
-    FP_TEST = 25
+    BUTTON_TEST = 25
     LED_TEST = 26
     VFD_TEST = 27
     GET_MACADR = 28
@@ -72,7 +73,7 @@ def buildCommandList():
     command_list.append("/root/htp/live -sat 8pskldpc -sym 7200000 -freq 1899") # TUNE_TEST = 22
     command_list.append("ctrl+c ") # STOP_TUNE_TEST = 23
     command_list.append("irctl 30" ) # IR_TEST = 24
-    command_list.append("/root/htp/gpio_interrupt 4 10 2 1 10" ) # FP_TEST = 25
+    command_list.append("/root/htp/gpio_interrupt 4 10 2 1 10" ) # BUTTON_TEST = 25
     command_list.append("led" ) # LED_TEST = 26
     command_list.append("/root/htp/vfd -r -i -x") # VFD_TEST = 27
     command_list.append("read_mac.sh") # GET_MACADR = 28
@@ -127,7 +128,7 @@ class SkedTelnet():
                         return data
         except:
             print "There is not connection "
-    '''#Not working on windows so disabled 
+    '''#Not working on windows so disabled
     def telReadSocket(self,app):
         try:
             s= self.tn.get_socket()
