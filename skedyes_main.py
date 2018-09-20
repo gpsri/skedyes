@@ -1384,6 +1384,7 @@ def stbDumpUecCode(app,tel) :
 
 def stbPerformUiUpgrade(app,tel):
     print "start UI Upgrade and OTP"
+    changeFwConfirmationMsg = "Are you sure want to change FW to"
     changeToUECFWMatchStr = "Change firmware to UEC is successful"
     otpStatusMatchStr = "006 Production OTP lock "
     ret = stbDumpUecCode(app,tel)
@@ -1391,19 +1392,22 @@ def stbPerformUiUpgrade(app,tel):
         print "Code dump OK - going to do the code swap"
 
         tel.telWrite(command_list[TestCommnad.UEC_FW_CODE_SWAP])
-        time.sleep(1)
-        waitforfind = 1
-        data = ""
-        while waitforfind:
-            data = tel.telReadSocket(app)
-            match = re.search(changeToUECFWMatchStr,data)
-            if match :
-                waitforfind = 0
-                print "Change firmware to UEC is successful"
-                print data
-
-            else:
-                continue
+        time.sleep(3)
+        data = tel.telReadSocket(app)
+        match = re.search(changeFwConfirmationMsg,data)
+        if match :
+            tel.telWrite("Y")
+            time.sleep(.2)
+            waitforfind = 1
+            while waitforfind:
+                data = tel.telReadSocket(app)
+                match = re.search(changeToUECFWMatchStr,data)
+                if match :
+                    waitforfind = 0
+                    print "Change firmware to UEC is successful"
+                    print data
+                else:
+                    continue
 
         #upgradeFirmwareSuccesfull Do the OTP
         tel.telWrite(command_list[TestCommnad.SET_OTP_CMD1])
@@ -1498,7 +1502,7 @@ except AttributeError:
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
     myapp = SkedYesUI()
-    myapp.setWindowTitle(_translate("SkedYes", "SKED YES V1.04", None))
+    myapp.setWindowTitle(_translate("SkedYes", "SKED YES V1.05", None))
 
     timenow = '%s' % (time.ctime(time.time()))
     myapp.ui.dateAndTime.setText(timenow)
