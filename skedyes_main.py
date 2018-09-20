@@ -815,23 +815,30 @@ def stbGetMacAddress( app, tel) :
 
 def stbDiseqcSettings(app,tel, diseqcObj):
     print "Diseqc Settings is called "
-    if((diseqcObj.lnb22KhzTone == 1) and (diseqcObj.lnbVoltage == 13 )):
+
+    if myapp.ui.lnbVoltage13.isChecked() and myapp.ui.diseqc22Khz.isChecked():
+        print "LNB 13V ON and 22Khz ON"
         tel.telWrite(command_list[TestCommnad.LNB_LOW_22K_ON])
         time.sleep(1)
         data = tel.telReadSocket(app)
-    elif((diseqcObj.lnb22KhzTone == 0) and (diseqcObj.lnbVoltage == 13 )):
+
+    elif myapp.ui.lnbVoltage13.isChecked() and not myapp.ui.diseqc22Khz.isChecked():
+        print "LNB 13V ON and 22Khz OFF"
         tel.telWrite(command_list[TestCommnad.LNB_LOW_22K_OFF])
         time.sleep(1)
         data = tel.telReadSocket(app)
-    elif((diseqcObj.lnb22KhzTone == 1) and (diseqcObj.lnbVoltage == 18 )):
+
+    elif myapp.ui.lnbVoltage18.isChecked() and myapp.ui.diseqc22Khz.isChecked():
+        print "LNB 18V ON and 22Khz ON"
         tel.telWrite(command_list[TestCommnad.LNB_HIGH_22K_ON])
         time.sleep(1)
         data = tel.telReadSocket(app)
-    else:
+
+    elif myapp.ui.lnbVoltage18.isChecked() and not myapp.ui.diseqc22Khz.isChecked():
+        print "LNB 18V ON and 22Khz OFF"
         tel.telWrite(command_list[TestCommnad.LNB_HIGH_22K_OFF])
         time.sleep(1)
         data = tel.telReadSocket(app)
-
 
 
 def stbPerformTunerTest(app,tel):
