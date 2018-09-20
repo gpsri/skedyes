@@ -2,7 +2,7 @@ import sys
 import telnetlib
 import time
 import select
-import serial
+#import serial
 from PyQt4 import QtCore, QtGui
 
 
@@ -166,7 +166,9 @@ class SkedTelnet():
         self.tn.write("exit" "\r\n")
         return self.tn.read_all()
 
+#giving problem in windows - disable it for now 
 
+'''
 #user = raw_input("Enter user name:")
 #password = getpass.getpass()
 class SkedSerial():
@@ -207,3 +209,4 @@ class SkedSerial():
                 return ''
         except:
             print "There is no connection "
+'''
