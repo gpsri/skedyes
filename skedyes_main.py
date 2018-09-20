@@ -1415,7 +1415,7 @@ def stbPerformUiUpgrade(app,tel):
                 print data
             else:
                 continue
-  
+
         app.ptc_update_msg("updateUiUpgradeResult","PASS","")
         return 1
 
@@ -1491,7 +1491,7 @@ except AttributeError:
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
     myapp = SkedYesUI()
-    myapp.setWindowTitle(_translate("SkedYes", "SKED YES V1.03", None))
+    myapp.setWindowTitle(_translate("SkedYes", "SKED YES V1.04", None))
 
     timenow = '%s' % (time.ctime(time.time()))
     myapp.ui.dateAndTime.setText(timenow)
