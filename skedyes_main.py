@@ -184,6 +184,25 @@ class getPTCThread(QThread):
                 print "stopIrTest"
                 stbStopIrTest(self,self.telnetcli)
 
+            elif (msg == "startHdcpKeyProgram"):
+
+                ret = stbPerformHdcpKeyProgramming(self,self.telnetcli)
+                if(ret > 0):
+                    print "HDCP Key Program Passed"
+                    self.ptc_update_msg("updateHdcpKeyResult","PASS",'')
+                else:
+                    print "HDCP Key Program Failed"
+                    self.ptc_update_msg("updateHdcpKeyResult","FAIL",'')
+            elif  (msg == "startUiUpgrade"):
+                print "startUiUpgrade"
+                ret = stbPerformUiUpgrade(self,self.telnetcli)
+                if(ret > 0):
+                    print "UI Upgrade passed"
+                    self.ptc_update_msg("updateUiUpgradeResult","PASS",'')
+                else:
+                    print "IR Test Failed"
+                    self.ptc_update_msg("updateUiUpgradeResult","FAIL",'')
+
             #print " %s" % ( time.ctime(time.time()))
             #timenow = '%s' % (time.ctime(time.time()))
             #self.ptc_update_msg("updateClock",timenow,"")
@@ -227,6 +246,17 @@ class SkedYesUI(QtGui.QMainWindow):
         self.ui.fpStopButton.setEnabled(False)
         self.ui.irStopButton.setEnabled(False)
         self.ui.buttonStopButton.setEnabled(False)
+        self.ui.tunerResult.setStyleSheet("QLabel { background-color : silver; color : gray; }");
+        self.ui.hddResult.setStyleSheet("QLabel { background-color : silver; color : gray; }");
+        self.ui.usbResult.setStyleSheet("QLabel { background-color : silver; color : gray; }");
+        self.ui.smartcardResult.setStyleSheet("QLabel { background-color : silver; color : gray; }");
+        self.ui.fanResult.setStyleSheet("QLabel { background-color : silver; color : gray; }");
+        self.ui.ledResult.setStyleSheet("QLabel { background-color : silver; color : gray; }");
+        self.ui.fpResult.setStyleSheet("QLabel { background-color : silver; color : gray; }");
+        self.ui.irResult.setStyleSheet("QLabel { background-color : silver; color : gray; }");
+        self.ui.buttonResult.setStyleSheet("QLabel { background-color : silver; color : gray; }");
+        self.ui.hdcpKeyResult.setStyleSheet("QLabel { background-color : silver; color : gray; }");
+        self.ui.uiUpgradeResult.setStyleSheet("QLabel { background-color : silver; color : gray; }");
 
         self.diseqcObj = Diseqc()
 
@@ -239,6 +269,47 @@ class SkedYesUI(QtGui.QMainWindow):
         self.ui.disconnectButton.setEnabled(False)
         self.tunerTestOptionUpdate()
         self.updateConnectionStatus("Not Connected ")
+        self.resetValues()
+
+
+    def resetValues(self):
+        self.ui.disconnectButton.setEnabled(False)
+        self.ui.tunerStopButton.setEnabled(False)
+        self.ui.hddStopButton.setEnabled(False)
+        self.ui.usbStopButton.setEnabled(False)
+        self.ui.smartcardStopButton.setEnabled(False)
+        self.ui.fanStopButton.setEnabled(False)
+        self.ui.ledStopButton.setEnabled(False)
+        self.ui.fpStopButton.setEnabled(False)
+        self.ui.irStopButton.setEnabled(False)
+        self.ui.buttonStopButton.setEnabled(False)
+        self.ui.tunerTestProgressBar.setProperty("value", 5)
+        self.ui.hddTestProgressBar.setProperty("value", 5)
+        self.ui.usbTestProgressBar.setProperty("value", 5)
+        self.ui.smartcardTestProgressbar.setProperty("value", 5)
+        self.ui.fanTestProgressbar.setProperty("value", 5)
+        self.ui.ledTestProgressbar.setProperty("value", 5)
+        self.ui.fpTestProgressbar.setProperty("value", 5)
+        self.ui.irTestProgressbar.setProperty("value", 5)
+        self.ui.buttonTestProgressbar.setProperty("value", 5)
+        self.ui.tunerResult.setStyleSheet("QLabel { background-color : silver; color : gray; }");
+        self.ui.hddResult.setStyleSheet("QLabel { background-color : silver; color : gray; }");
+        self.ui.usbResult.setStyleSheet("QLabel { background-color : silver; color : gray; }");
+        self.ui.smartcardResult.setStyleSheet("QLabel { background-color : silver; color : gray; }");
+        self.ui.fanResult.setStyleSheet("QLabel { background-color : silver; color : gray; }");
+        self.ui.ledResult.setStyleSheet("QLabel { background-color : silver; color : gray; }");
+        self.ui.fpResult.setStyleSheet("QLabel { background-color : silver; color : gray; }");
+        self.ui.irResult.setStyleSheet("QLabel { background-color : silver; color : gray; }");
+        self.ui.buttonResult.setStyleSheet("QLabel { background-color : silver; color : gray; }");
+        self.ui.hdcpKeyResult.setStyleSheet("QLabel { background-color : silver; color : gray; }");
+        self.ui.uiUpgradeResult.setStyleSheet("QLabel { background-color : silver; color : gray; }");
+        self.ui.textStbSwVersion.clear()
+        self.ui.textStbEth0Mac.clear()
+        self.ui.textStbWifiMac.clear()
+        self.ui.textStbModel.clear()
+        self.ui.textStbHddSn.clear()
+        self.ui.statusMsgLabel.clear()
+
 
     def connectTheSTB(self):
         print "Connecting to telnet ... "
@@ -280,6 +351,8 @@ class SkedYesUI(QtGui.QMainWindow):
         self.ui.lnbVoltage13.clicked.connect(self.changeDiseqcSettings)
         self.ui.lnbVoltage18.clicked.connect(self.changeDiseqcSettings)
         self.ui.diseqc22Khz.clicked.connect(self.changeDiseqcSettings)
+        self.ui.hdcpStartButton.clicked.connect(self.startHdcpKeyProgram)
+        self.ui.uiUpdateStartButton.clicked.connect(self.startUiUpgrade)
         self.ui.statusMsgLabel.setStyleSheet("QLabel { background-color : black; color : white; }")
 
 
@@ -406,6 +479,19 @@ class SkedYesUI(QtGui.QMainWindow):
         self.msgQ.put("stopFpTest")
         self.ui.fpStopButton.setEnabled(False)
 
+    def startHdcpKeyProgram(self):
+        self.tunerTestOptionUpdate()
+        self.msgQ.put("startHdcpKeyProgram")
+        self.ui.hdcpStartButton.setEnabled(False)
+        self.ui.hdcpKeyResult.setStyleSheet("QLabel { background-color : gray; color : black; }");
+
+    def startUiUpgrade(self):
+        self.tunerTestOptionUpdate()
+        self.msgQ.put("startUiUpgrade")
+        self.ui.uiUpdateStartButton.setEnabled(False)
+        self.ui.uiUpgradeResult.setStyleSheet("QLabel { background-color : gray; color : black; }");
+
+
     def uiUpdateProcess( self, option, value, msg ):
         if(option == "updateClock"):
             self.updateClock(value)
@@ -461,6 +547,10 @@ class SkedYesUI(QtGui.QMainWindow):
             self.updateTunerTestResult(value)
         elif (option == "updateTunerTestProgress"):
             self.updateTunerTestProgress(value, int (msg))
+        elif (option == "updateHdcpKeyResult"):
+            self.updateHdcpKeyResult(value)
+        elif (option == "updateUiUpgradeResult"):
+            self.updateUiUpgradeResult(value)
 
 
     def updateConnectionStatus(self,text):
@@ -536,6 +626,25 @@ class SkedYesUI(QtGui.QMainWindow):
             self.ui.usbResult.setText("FAIL")
         self.ui.usbStartButton.setEnabled(True)
         self.ui.usbStopButton.setEnabled(False)
+
+    def updateHdcpKeyResult(self,text):
+        if(text == "PASS"):
+            self.ui.hdcpKeyResult.setStyleSheet("QLabel { background-color : green; color : white; }");
+            self.ui.hdcpKeyResult.setText("PASS")
+        elif(text == "FAIL"):
+            self.ui.hdcpKeyResult.setStyleSheet("QLabel { background-color : red; color : white; }");
+            self.ui.hdcpKeyResult.setText("FAIL")
+        self.ui.hdcpStartButton.setEnabled(True)
+
+
+    def updateUiUpgradeResult(self,text):
+        if(text == "PASS"):
+            self.ui.uiUpgradeResult.setStyleSheet("QLabel { background-color : green; color : white; }");
+            self.ui.uiUpgradeResult.setText("PASS")
+        elif(text == "FAIL"):
+            self.ui.uiUpgradeResult.setStyleSheet("QLabel { background-color : red; color : white; }");
+            self.ui.uiUpgradeResult.setText("FAIL")
+        self.ui.uiUpdateStartButton.setEnabled(True)
 
     def updateSmartcardTestProgress(self,text, value):
         self.ui.smartcardTestProgressbar.setProperty("value",value)
@@ -1142,6 +1251,174 @@ def stbStopIrTest(app,tel):
     print("IR Test Stopped")
     tel.telWrite(command_list[TestCommnad.STOP_TUNE_TEST]) # ctrl +c to stop
     time.sleep(2)
+
+def stbPerformHdcpKeyProgramming(app,tel):
+    hdcpKeyResponseMatchString1 = "Get key from key server"
+    hdcpKeyResponseMatchString2 = "Key Server IP"
+    hdcpKeyResponseMatchString3 = "MAC"
+    hdcpKeyResponseMatchString4 = "Handling HDCP key is successful"
+    hdcpKeyResponseMatchString5 = "Handling HDCP key is failed"
+    hdcpKeyResponseMatchString6 = "HDCP1.4 key isn't exist"
+    hdcpKeyResponseMatchString7 = "HDCP2.2 key isn't exist"
+
+    print "start hdcp key programming"
+    macadd = myapp.ui.macAddressInputValue.text()
+    print macadd
+       # Write MAC Address
+    statusStr = "Write MAC successfully"
+    tel.telWrite('\x03') #ctrl + c
+    time.sleep(1)
+    write_cmd = command_list[TestCommnad.WRITE_MAC] +" "+macadd
+    tel.telWrite(write_cmd)
+    time.sleep(1)
+    print time.time()
+    waitforfind = 1
+    while waitforfind:
+        data = tel.telReadSocket(app)
+        match = re.search(statusStr,data)
+        if match :
+            waitforfind = 0
+            print data
+
+    macaddList = stbGetMacAddress(app, tel)
+    ethMac = "%s" % macaddList[0]
+    wifiMac = "%s" % macaddList[1]
+    print ethMac
+    print wifiMac
+    app.ptc_update_msg("updateEthMacAddr",ethMac,"")
+    app.ptc_update_msg("updateWifiMacAddr",wifiMac,"")
+
+    tel.telWrite('\x03') #ctrl + c
+    tel.telWrite(command_list[TestCommnad.PROGRAM_HDCP])
+    data = tel.telReadSocket(app)
+    time.sleep(.5)
+    match = re.search(hdcpKeyResponseMatchString1,data)
+    if match:
+        tel.telWrite("Y")
+        time.sleep(.2)
+        data = tel.telReadSocket(app)
+        match = re.search(hdcpKeyResponseMatchString2,data)
+        if match:
+            tel.telWrite("192.192.192.3")
+            time.sleep(.2)
+            data = tel.telReadSocket(app)
+            match = re.search(hdcpKeyResponseMatchString3,data)
+            if match:
+                macadd =str( myapp.ui.macAddressInputValue.text())
+                print [macadd]
+                tel.telWrite(macadd)
+                time.sleep(.2)
+                matchcase = 1
+                count = 0
+                while matchcase or count < 30:
+                    data = tel.telReadSocket(app)
+                    match = re.search(hdcpKeyResponseMatchString4,data)
+                    match1 = re.search(hdcpKeyResponseMatchString5,data)
+                    if  match1:
+                        app.ptc_update_msg("updateHdcpKeyResult","FAIL","")
+                        return 0
+                    elif match:
+                        #verify the Keys 1.x
+                        tel.telWrite(command_list[TestCommnad.VERIFY_HDCP_1X])
+                        time.sleep(1)
+                        data = tel.telReadSocket(app)
+                        match = re.search(hdcpKeyResponseMatchString6,data)
+                        if match:
+                            print "HDCP 1.x Validation Fail Please check the mac address"
+                            app.ptc_update_msg("updateHdcpKeyResult","FAIL","")
+                            return 0
+                        #verify the Keys 2.x
+                        tel.telWrite(command_list[TestCommnad.VERIFY_HDCP_2X])
+                        time.sleep(1)
+                        data = tel.telReadSocket(app)
+                        match = re.search(hdcpKeyResponseMatchString7,data)
+                        if match:
+                            print "HDCP 2.x Validation Fail Please check the mac address"
+                            app.ptc_update_msg("updateHdcpKeyResult","FAIL","")
+                            return 0
+
+                        app.ptc_update_msg("updateHdcpKeyResult","PASS","")
+                        return 1
+
+                    else:
+                        count +=1
+                        continue
+
+
+def stbDumpUecCode(app,tel) :
+    dumpResponseString = "seconds"
+    dumpMd5SumString = "UECN1_nopad_dump"
+    tel.telWrite(command_list[TestCommnad.DUMP_UECCODE])
+    data = tel.telReadSocket(app)
+    print data
+    waitforfind = 1
+    while waitforfind:
+        data = tel.telReadSocket(app)
+        match = re.search(dumpResponseString,data)
+        if match :
+            waitforfind = 0
+            print data
+        else:
+            continue
+
+    #check and compare UEC code md5sum
+    tel.telWrite(command_list[TestCommnad.CHECK_UECCODE])
+    waitforfind = 1
+    data1 = ""
+    while waitforfind:
+        data1 = tel.telReadSocket(app)
+        match = re.search(dumpMd5SumString,data1)
+        if match :
+            waitforfind = 0
+            print data1
+            return 1
+        else:
+            continue
+
+def stbPerformUiUpgrade(app,tel):
+    print "start UI Upgrade and OTP"
+    changeToUECFWMatchStr = "Change firmware to UEC is successful"
+    otpStatusMatchStr = "006 Production OTP lock "
+    ret = stbDumpUecCode(app,tel)
+    if ret:
+        print "Code dump OK - going to do the code swap"
+
+        tel.telWrite(command_list[TestCommnad.UEC_FW_CODE_SWAP])
+        time.sleep(1)
+        waitforfind = 1
+        data = ""
+        while waitforfind:
+            data = tel.telReadSocket(app)
+            match = re.search(changeToUECFWMatchStr,data)
+            if match :
+                waitforfind = 0
+                print "Change firmware to UEC is successful"
+                print data
+
+            else:
+                continue
+
+        #upgradeFirmwareSuccesfull Do the OTP
+        tel.telWrite(command_list[TestCommnad.SET_OTP_CMD1])
+        time.sleep(1)
+        data = tel.telReadSocket(app)
+        tel.telWrite(command_list[TestCommnad.SET_OTP_CMD2])
+        time.sleep(1)
+        waitforfind = 1
+        data = ""
+        while waitforfind:
+            data = tel.telReadSocket(app)
+            match = re.search(otpStatusMatchStr,data)
+            if match :
+                waitforfind = 0
+                print "Change OTP to UEC is successful"
+                print data
+            else:
+                continue
+  
+        app.ptc_update_msg("updateUiUpgradeResult","PASS","")
+        return 1
+
 
 def stbPerformButtonTest(app,tel):
     retry = 1
