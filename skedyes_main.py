@@ -2,7 +2,7 @@ import sys
 from PyQt4 import QtCore, QtGui
 from PyQt4.QtCore import QThread, SIGNAL
 from skqtui import Ui_SkedYes
-from stbcom import TestCommnad, SkedTelnet, buildCommandList, command_list
+from stbcom import TestCommnad, SkedTelnet, buildCommandList, command_list,SkedSerial
 # telnet program example
 import socket, select, string, threading, time
 from threading import Thread, Lock
@@ -242,7 +242,8 @@ class SkedYesUI(QtGui.QMainWindow):
 
     def connectTheSTB(self):
         print "Connecting to telnet ... "
-        self.telnetcli = SkedTelnet()
+        #self.telnetcli = SkedTelnet()
+        self.telnetcli = SkedSerial()
         print "Connected "
         self.updateConnectionStatus("Connected ")
         buildCommandList()
@@ -673,6 +674,7 @@ def stbGetTemperature(appThread,tel):
 
 def stbGetSoftwareVersion( app, tel) :
     tel.telWrite(command_list[TestCommnad.GET_VER])
+    time.sleep(1)
     data = tel.telReadSocket(app)
     print data
     swver = data[(data.find("stb")):]
@@ -927,6 +929,7 @@ def stbPerformHddTest(app,tel):
     #Send Ctrl C to stop previous running tests
     tel.telWrite('\x03') #ctrl + c
     currentProgressbarValue = 20
+    updateHddSerailNumberString = "hddSerialNumber"
     formatstartString = "Format Started"
     formatCompleteString = "Format Completed"
     hddTestCompleteString = "aft"
@@ -938,14 +941,19 @@ def stbPerformHddTest(app,tel):
     time.sleep(1)
     data = tel.telReadSocket(app)
     print list(data)
-    hddserial = (data[21:29])
-    print hddserial
+    match = re.search(updateHddSerailNumberString,data)
+    if match:
+        hddserial = data[(data.find(updateHddSerailNumberString))+ 17:(data.find(updateHddSerailNumberString))+25]
+
+        #hddserial = (data[21:29])
+        print hddserial
+
     app.ptc_update_msg("updateHddSerial",hddserial,"")
     app.ptc_update_msg("updateHddTestProgress","Test Initiated",str(currentProgressbarValue))
 
     tel.telWrite(command_list[TestCommnad.HDD_FORMAT_CMD1])
-    data = tel.telReadSocket(app)
     tel.telWrite(command_list[TestCommnad.HDD_FORMAT_CMD2])
+    time.sleep(2)
     data = tel.telReadSocket(app)
     currentProgressbarValue = currentProgressbarValue + 10
     app.ptc_update_msg("updateHddTestProgress","Format begins",str(currentProgressbarValue))
@@ -962,6 +970,9 @@ def stbPerformHddTest(app,tel):
             QtCore.QCoreApplication.processEvents()
             count = count + 1
             data = tel.telReadSocket(app)
+            if data == '':
+                continue
+                 
             match1 = re.search(formatCompleteString,data)
             if match1:
                 currentProgressbarValue = currentProgressbarValue + (count * 2)
@@ -1153,9 +1164,9 @@ def stbPerformButtonTest(app,tel):
     buttonFailString = "Button1 Failed 0"
     app.ptc_update_msg("updateButtonTestProgress","Test Initiated",str(currentProgressbarValue))
     tel.telWrite(command_list[TestCommnad.BUTTON_TEST])
-    time.sleep(2)
+    time.sleep(.5)
     data = tel.telReadSocket(app)
-    time.sleep(2)
+    time.sleep(.5)
     #print list(data)
     match = re.search(buttonPassString,data)
     if match:

@@ -2,7 +2,9 @@ import sys
 import telnetlib
 import time
 import select
+import serial
 from PyQt4 import QtCore, QtGui
+
 
 HOST = "192.192.192.2"
 #HOST = "192.168.0.240"
@@ -163,3 +165,49 @@ class SkedTelnet():
     def telexit(self):
         self.tn.write("exit" "\r\n")
         return self.tn.read_all()
+
+
+#user = raw_input("Enter user name:")
+#password = getpass.getpass()
+class SkedSerial():
+    def __init__(self):
+        ser = serial.Serial(
+            port='/dev/ttyUSB0',
+            baudrate=115200,
+            parity=serial.PARITY_NONE,
+            stopbits=serial.STOPBITS_ONE,
+            bytesize=serial.EIGHTBITS,
+            xonxoff = False,
+            rtscts = True
+        )
+
+        ser.isOpen()
+        self.serial = ser
+        #print tn.read_until("gps")
+
+    def telWrite(self,string):
+        try:
+            print("Going To write " + string)
+            self.serial.write(string + "\r\n")
+        except:
+            time.sleep(1)
+
+    def telReadSocket(self,app):
+        print "telReadSocket"
+        try:
+            data = ''
+            while self.serial.inWaiting() > 0:
+                data += self.serial.read(1)
+                print data
+                QtCore.QCoreApplication.processEvents()
+
+            if data != '':
+                print list(data)
+                sys.stdout.write(data)
+                #user entered a message
+                app.ptc_update_msg("updateTelnetEditor",data,"")
+                return data
+            else:
+                return ''
+        except:
+            print "There is no connection "
