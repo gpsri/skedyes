@@ -10,6 +10,8 @@ import xml.etree.ElementTree as ET
 #from sklearn import tree
 import re
 import signal
+from screeninfo import get_monitors
+
 from Queue import Queue
 
 class Diseqc:
@@ -1504,6 +1506,19 @@ if __name__ == "__main__":
     myapp = SkedYesUI()
     myapp.setWindowTitle(_translate("SkedYes", "SKED YES V1.05", None))
 
+    for m in get_monitors():
+        print(str(m))
+        print
+
+    monitor1 = str(m)
+    if monitor1 !='':
+        widthstr = (monitor1[7:10])
+        heightstr = (monitor1[11:14])
+
+    print widthstr
+    print heightstr
+
+    myapp.ui.resize(1920,1080)
     timenow = '%s' % (time.ctime(time.time()))
     myapp.ui.dateAndTime.setText(timenow)
     myapp.show()

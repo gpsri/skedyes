@@ -688,4 +688,3 @@ class Ui_SkedYes(object):
         self.macAddressInputValue.setText(_translate("SkedYes", "0010057E", None))
         self.uiUpgradeResult.setText(_translate("SkedYes", "PASS", None))
         self.hdcpKeyResult.setText(_translate("SkedYes", "PASS", None))
-
