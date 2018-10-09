@@ -12,10 +12,6 @@ import re
 import signal
 from Queue import Queue
 
-class Diseqc:
-    lnbVoltage = 13 # 0 -OFF, 13 = 13Volt 18 = 18V
-    lnb22KhzTone = 0 # 0 -OFF 1 = ON
-
 
 hddmutex = Lock()
 
@@ -67,14 +63,13 @@ def ptc_ui_to_num_options(uioption):
     }. get("default", 99)
 
 class getPTCThread(QThread):
-    def __init__(self,msgQ ,telnetcli, option,value, msg ,diseqcObj):
+    def __init__(self,msgQ ,telnetcli, option,value, msg ):
         QThread.__init__(self)
         self.msgQ = msgQ
         self.option = option
         self.value  = value
         self.msg = msg
         self.telnetcli = telnetcli
-        self.diseqcObj = diseqcObj
 
     def __del__(self):
         self.wait()
@@ -87,7 +82,6 @@ class getPTCThread(QThread):
             msg = self.msgQ.get()
             print " %s " % msg
             if(msg == "startTunerTest"):
-                stbDiseqcSettings(self,self.telnetcli, self.diseqcObj)
                 ret = stbPerformTunerTest(self,self.telnetcli)
                 if(ret > 0):
                     print "Tuner Test Passed"
@@ -202,6 +196,15 @@ class getPTCThread(QThread):
                 else:
                     print "IR Test Failed"
                     self.ptc_update_msg("updateUiUpgradeResult","FAIL",'')
+            elif  (msg == "startLnbTest"):
+                print "startLnbTest"
+                ret = stbPerformLnbTest(self,self.telnetcli)
+                if(ret > 0):
+                    print "LNB Test passed"
+                    self.ptc_update_msg("updateLnbTestResult","PASS",'')
+                else:
+                    print "LNB Test Failed"
+                    self.ptc_update_msg("updateLnbTestResult","FAIL",'')
 
             #print " %s" % ( time.ctime(time.time()))
             #timenow = '%s' % (time.ctime(time.time()))
@@ -246,6 +249,7 @@ class SkedYesUI(QtGui.QMainWindow):
         self.ui.fpStopButton.setEnabled(False)
         self.ui.irStopButton.setEnabled(False)
         self.ui.buttonStopButton.setEnabled(False)
+        self.ui.lnbStopButton.setEnabled(False)
         self.ui.tunerResult.setStyleSheet("QLabel { background-color : silver; color : gray; }");
         self.ui.hddResult.setStyleSheet("QLabel { background-color : silver; color : gray; }");
         self.ui.usbResult.setStyleSheet("QLabel { background-color : silver; color : gray; }");
@@ -257,8 +261,8 @@ class SkedYesUI(QtGui.QMainWindow):
         self.ui.buttonResult.setStyleSheet("QLabel { background-color : silver; color : gray; }");
         self.ui.hdcpKeyResult.setStyleSheet("QLabel { background-color : silver; color : gray; }");
         self.ui.uiUpgradeResult.setStyleSheet("QLabel { background-color : silver; color : gray; }");
+        self.ui.lnbResult.setStyleSheet("QLabel { background-color : silver; color : gray; }");
 
-        self.diseqcObj = Diseqc()
 
     def disconectTheSTB(self):
         self.telnetcli.telWrite('\x03') #ctrl + c
@@ -275,6 +279,7 @@ class SkedYesUI(QtGui.QMainWindow):
     def resetValues(self):
         self.ui.disconnectButton.setEnabled(False)
         self.ui.tunerStopButton.setEnabled(False)
+        self.ui.lnbStopButton.setEnabled(False)
         self.ui.hddStopButton.setEnabled(False)
         self.ui.usbStopButton.setEnabled(False)
         self.ui.smartcardStopButton.setEnabled(False)
@@ -284,6 +289,7 @@ class SkedYesUI(QtGui.QMainWindow):
         self.ui.irStopButton.setEnabled(False)
         self.ui.buttonStopButton.setEnabled(False)
         self.ui.tunerTestProgressBar.setProperty("value", 5)
+        self.ui.lnbTestProgressbar.setProperty("value", 5)
         self.ui.hddTestProgressBar.setProperty("value", 5)
         self.ui.usbTestProgressBar.setProperty("value", 5)
         self.ui.smartcardTestProgressbar.setProperty("value", 5)
@@ -303,6 +309,7 @@ class SkedYesUI(QtGui.QMainWindow):
         self.ui.buttonResult.setStyleSheet("QLabel { background-color : silver; color : gray; }");
         self.ui.hdcpKeyResult.setStyleSheet("QLabel { background-color : silver; color : gray; }");
         self.ui.uiUpgradeResult.setStyleSheet("QLabel { background-color : silver; color : gray; }");
+        self.ui.lnbResult.setStyleSheet("QLabel { background-color : silver; color : gray; }");
         self.ui.textStbSwVersion.clear()
         self.ui.textStbEth0Mac.clear()
         self.ui.textStbWifiMac.clear()
@@ -320,7 +327,7 @@ class SkedYesUI(QtGui.QMainWindow):
         option = ""
         value = ""
         msg = ""
-        self.ptcHandlingThread = getPTCThread(self.msgQ, self.telnetcli,option,value,msg,self.diseqcObj )
+        self.ptcHandlingThread = getPTCThread(self.msgQ, self.telnetcli,option,value,msg )
         self.connect(self.ptcHandlingThread, SIGNAL("uiUpdateProcess(QString,QString,QString)"),self.uiUpdateProcess)
         self.ui.disconnectButton.clicked.connect(self.disconectTheSTB)
         self.ptcHandlingThread.start()
@@ -331,6 +338,9 @@ class SkedYesUI(QtGui.QMainWindow):
 
         self.ui.tunerStartButton.clicked.connect(self.startTunerTest)
         self.ui.tunerStopButton.clicked.connect(self.stopTunerTest)
+
+        self.ui.lnbStartButton.clicked.connect(self.startLnbTest)
+        self.ui.lnbStopButton.clicked.connect(self.stopLnbTest)
 
         self.ui.hddStartButton.clicked.connect(self.startHddTest)
         self.ui.hddStopButton.clicked.connect(self.stopHddTest)
@@ -348,27 +358,11 @@ class SkedYesUI(QtGui.QMainWindow):
         self.ui.buttonStopButton.clicked.connect(self.stopButtonTest)
         self.ui.irStartButton.clicked.connect(self.startIrTest)
         self.ui.irStopButton.clicked.connect(self.stopIrTest)
-        self.ui.lnbVoltage13.clicked.connect(self.changeDiseqcSettings)
-        self.ui.lnbVoltage18.clicked.connect(self.changeDiseqcSettings)
-        self.ui.diseqc22Khz.clicked.connect(self.changeDiseqcSettings)
         self.ui.hdcpStartButton.clicked.connect(self.startHdcpKeyProgram)
         self.ui.uiUpdateStartButton.clicked.connect(self.startUiUpgrade)
         self.ui.statusMsgLabel.setStyleSheet("QLabel { background-color : black; color : white; }")
-
-
-    def changeDiseqcSettings(self):
-        if(self.ui.lnbVoltage13.isChecked()):
-            self.diseqcObj.lnbVoltage = 13
-            print ("LNB 13V ON")
-        elif(self.ui.lnbVoltage18.isChecked()):
-            print ("LNB 18V ON")
-            self.diseqcObj.lnbVoltage = 18
-        if( self.ui.diseqc22Khz.isChecked()):
-            print ("LNB 22Khz ON")
-            self.diseqcObj.lnb22KhzTone = 1
-        else:
-            print ("LNB 22Khz OFF")
-            self.diseqcObj.lnb22KhzTone = 0
+        if(self.ui.autoTestButton.isChecked()):
+            self.startHddTest()
 
     def tunerTestOptionUpdate(self):
         self.ui.tunerStartButton.setEnabled(True)
@@ -379,10 +373,22 @@ class SkedYesUI(QtGui.QMainWindow):
         self.ui.tunerStartButton.setEnabled(False)
         self.ui.tunerResult.setStyleSheet("QLabel { background-color : gray; color : black; }");
         self.ui.tunerStopButton.setEnabled(True)
+
     def stopTunerTest(self):
         self.ui.tunerStartButton.setEnabled(True)
         self.ui.tunerStopButton.setEnabled(False)
         self.msgQ.put("stopTunerTest")
+
+    def startLnbTest(self):
+        self.msgQ.put("startLnbTest")
+        self.ui.lnbStartButton.setEnabled(False)
+        self.ui.lnbResult.setStyleSheet("QLabel { background-color : gray; color : black; }");
+        self.ui.lnbStopButton.setEnabled(True)
+
+    def stopLnbTest(self):
+        self.ui.lnbStartButton.setEnabled(True)
+        self.ui.lnbStopButton.setEnabled(False)
+        self.msgQ.put("stopLnbTest")
 
     def startButtonTest(self):
         self.msgQ.put("startButtonTest")
@@ -547,6 +553,10 @@ class SkedYesUI(QtGui.QMainWindow):
             self.updateTunerTestResult(value)
         elif (option == "updateTunerTestProgress"):
             self.updateTunerTestProgress(value, int (msg))
+        elif (option == "updateLnbTestResult"):
+            self.updateLnbTestResult(value)
+        elif (option == "updateLnbTestProgress"):
+            self.updateLnbTestProgress(value, int (msg))
         elif (option == "updateHdcpKeyResult"):
             self.updateHdcpKeyResult(value)
         elif (option == "updateUiUpgradeResult"):
@@ -603,7 +613,8 @@ class SkedYesUI(QtGui.QMainWindow):
         self.ui.hddStartButton.setEnabled(True)
         self.ui.hddStopButton.setEnabled(False)
         if(self.ui.autoTestButton.isChecked()):
-            self.startHddTest()
+            self.startUsbTest()
+        #    self.startHddTest()
 
     def updateHddTestProgress(self,text, value):
         self.ui.hddTestProgressBar.setProperty("value",value)
@@ -626,6 +637,8 @@ class SkedYesUI(QtGui.QMainWindow):
             self.ui.usbResult.setText("FAIL")
         self.ui.usbStartButton.setEnabled(True)
         self.ui.usbStopButton.setEnabled(False)
+        if(self.ui.autoTestButton.isChecked()):
+            self.startSmartcardTest()
 
     def updateHdcpKeyResult(self,text):
         if(text == "PASS"):
@@ -661,6 +674,8 @@ class SkedYesUI(QtGui.QMainWindow):
 
         self.ui.smartcardStartButton.setEnabled(True)
         self.ui.smartcardStopButton.setEnabled(False)
+        if(self.ui.autoTestButton.isChecked()):
+            self.startFanTest()
 
 
     def updateIrTestProgress(self,text, value):
@@ -692,6 +707,8 @@ class SkedYesUI(QtGui.QMainWindow):
             self.ui.fanResult.setText("FAIL")
         self.ui.fanStartButton.setEnabled(True)
         self.ui.fanStopButton.setEnabled(False)
+        if(self.ui.autoTestButton.isChecked()):
+            self.startLnbTest()
 
     def updateFanTestSpeed(self,text):
             self.ui.fanSpeed.setText(text)
@@ -723,6 +740,24 @@ class SkedYesUI(QtGui.QMainWindow):
     def updateTunerTestProgress(self,text, value):
         self.ui.tunerTestProgressBar.setProperty("value",value)
         self.ui.statusMsgLabel.setText("Tuner Test :")
+        self.ui.statusMsgLabel.setText(text)
+
+    def updateLnbTestResult(self, text):
+        if(text == "PASS"):
+            self.ui.lnbResult.setStyleSheet("QLabel { background-color : green; color : white; }");
+            self.ui.lnbResult.setText("PASS")
+        elif(text == "FAIL"):
+            self.ui.lnbResult.setStyleSheet("QLabel { background-color : red; color : white; }");
+            self.ui.lnbResult.setText("FAIL")
+
+        self.ui.lnbStartButton.setEnabled(True)
+        self.ui.lnbStopButton.setEnabled(False)
+        #if(self.ui.autoTestButton.isChecked()):
+        #    self.startTunerTest()
+
+    def updateLnbTestProgress(self,text, value):
+        self.ui.lnbTestProgressbar.setProperty("value",value)
+        self.ui.statusMsgLabel.setText("LNB Test :")
         self.ui.statusMsgLabel.setText(text)
 
     def updateFpTestResult(self, text):
@@ -813,33 +848,34 @@ def stbGetMacAddress( app, tel) :
 
 
 
-def stbDiseqcSettings(app,tel, diseqcObj):
+def stbDiseqcSettings(app,tel):
     print "Diseqc Settings is called "
+    print "LNB 18V ON and 22Khz ON"
+    tel.telWrite(command_list[TestCommnad.LNB_HIGH_22K_ON])
+    time.sleep(1)
+    data = tel.telReadSocket(app)
 
-    if myapp.ui.lnbVoltage13.isChecked() and myapp.ui.diseqc22Khz.isChecked():
-        print "LNB 13V ON and 22Khz ON"
-        tel.telWrite(command_list[TestCommnad.LNB_LOW_22K_ON])
-        time.sleep(1)
-        data = tel.telReadSocket(app)
-
-    elif myapp.ui.lnbVoltage13.isChecked() and not myapp.ui.diseqc22Khz.isChecked():
-        print "LNB 13V ON and 22Khz OFF"
-        tel.telWrite(command_list[TestCommnad.LNB_LOW_22K_OFF])
-        time.sleep(1)
-        data = tel.telReadSocket(app)
-
-    elif myapp.ui.lnbVoltage18.isChecked() and myapp.ui.diseqc22Khz.isChecked():
-        print "LNB 18V ON and 22Khz ON"
-        tel.telWrite(command_list[TestCommnad.LNB_HIGH_22K_ON])
-        time.sleep(1)
-        data = tel.telReadSocket(app)
-
-    elif myapp.ui.lnbVoltage18.isChecked() and not myapp.ui.diseqc22Khz.isChecked():
-        print "LNB 18V ON and 22Khz OFF"
-        tel.telWrite(command_list[TestCommnad.LNB_HIGH_22K_OFF])
-        time.sleep(1)
-        data = tel.telReadSocket(app)
-
+def stbPerformLnbTest(app, tel):
+    currentProgressbarValue = 20
+    matchStr18V = "18V"
+    matchStr22k ="22k:on"
+    print "LNB 18V ON and 22Khz ON"
+    app.ptc_update_msg("updateLnbTestProgress","Test Initiated",str(currentProgressbarValue))
+    tel.telWrite(command_list[TestCommnad.LNB_HIGH_22K_ON])
+    time.sleep(1)
+    data = tel.telReadSocket(app)
+    currentProgressbarValue = 50
+    app.ptc_update_msg("updateLnbTestProgress","Test Progress",str(currentProgressbarValue))
+    match = re.search(matchStr18V,data)
+    match1 = re.search(matchStr22k,data)
+    if match and match1:
+        currentProgressbarValue = 100
+        app.ptc_update_msg("updateLnbTestProgress","Test Done",str(currentProgressbarValue))
+        return 1
+    else:
+        currentProgressbarValue = 100
+        app.ptc_update_msg("updateLnbTestProgress","Test Done",str(currentProgressbarValue))
+        return 0
 
 def stbPerformTunerTest(app,tel):
 
@@ -1502,27 +1538,12 @@ except AttributeError:
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
     myapp = SkedYesUI()
-    myapp.setWindowTitle(_translate("SkedYes", "SKED YES V1.06", None))
+    myapp.setWindowTitle(_translate("SkedYes", "SKED YES V1.07", None))
 
     timenow = '%s' % (time.ctime(time.time()))
     myapp.ui.dateAndTime.setText(timenow)
     myapp.show()
     myapp.updateConnectionStatus("Not Connected ")
-    '''
-    buildCommandList()
-    tel.telWrite("ls \n")
-    data = tel.telReadSocket(myapp)
-    print data
-    getSerialNumber(myapp, tel)
-    getMacAddress(myapp, tel)
-    performHDDTest(myapp, tel)
-
-    skedPtcAppThread.startThread()
-    skedPtcAppThread.start()
-    '''
-    #QtCore.QObject.connect(self.StartButton, QtCore.SIGNAL(_fromUtf8("clicked()")), self.labelHDDTestSetFocus)
-    #QtCore.QObject.connect(myapp.ui.StopButton, QtCore.SIGNAL(_fromUtf8("clicked(bool)")), disconectTheSTB)
     QtCore.QObject.connect(app, QtCore.SIGNAL(_fromUtf8("lastWindowClosed()")),forceCloseApp)
-    #QtCore.QObject.connect(myapp.ui.StartButton, QtCore.SIGNAL(_fromUtf8("clicked()")), connectTheSTB)
     signal.signal(signal.SIGINT, signal.SIG_DFL)
     sys.exit(app.exec_())
