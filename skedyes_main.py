@@ -216,6 +216,8 @@ class getPTCThread(QThread):
         self.runThread = 1
     def stopThread(self):
         self.runThread = 0
+
+
     def ptc_update_systemInfo(self):
         stbSoftwareVer = stbGetSoftwareVersion(self, self.telnetcli)
         self.ptc_update_msg("updateSoftwareVersion",stbSoftwareVer,"")
@@ -238,7 +240,6 @@ class SkedYesUI(QtGui.QMainWindow):
         self.ui.setupUi(self)
         self.ui.connectToStbButton.clicked.connect(self.connectTheSTB)
         self.ui.disconnectButton.clicked.connect(self.disconectTheSTB)
-        self.msgQ = Queue()
         self.ui.disconnectButton.setEnabled(False)
         self.ui.tunerStopButton.setEnabled(False)
         self.ui.hddStopButton.setEnabled(False)
@@ -265,16 +266,24 @@ class SkedYesUI(QtGui.QMainWindow):
 
 
     def disconectTheSTB(self):
+
+        while self.msgQ.empty() == False:
+            self.msgQ.get()
+            self.msgQ.task_done()
+
         self.telnetcli.telWrite('\x03') #ctrl + c
         time.sleep(1)
         #self.telnetcli.telWrite("exit") #Exit
         self.telnetcli.telExit() # close the telenet connection
         self.ptcHandlingThread.stopThread()
+        self.ptcHandlingThread.quit() # Equivalent to calling QThread.exit(0).
         self.ui.connectToStbButton.setEnabled(True)
         self.ui.disconnectButton.setEnabled(False)
         self.tunerTestOptionUpdate()
         self.updateConnectionStatus("Not Connected ")
         self.resetValues()
+
+
 
 
     def resetValues(self):
@@ -318,6 +327,32 @@ class SkedYesUI(QtGui.QMainWindow):
         self.ui.textStbHddSn.clear()
         self.ui.statusMsgLabel.clear()
 
+        self.ui.disconnectButton.clicked.disconnect()
+        self.ui.tunerStartButton.clicked.disconnect()
+        self.ui.tunerStopButton.clicked.disconnect()
+
+        self.ui.lnbStartButton.clicked.disconnect()
+        self.ui.lnbStopButton.clicked.disconnect()
+
+        self.ui.hddStartButton.clicked.disconnect()
+        self.ui.hddStopButton.clicked.disconnect()
+        self.ui.usbStartButton.clicked.disconnect()
+        self.ui.usbStopButton.clicked.disconnect()
+        self.ui.smartcardStartButton.clicked.disconnect()
+        self.ui.smartcardStopButton.clicked.disconnect()
+        self.ui.fanStartButton.clicked.disconnect()
+        self.ui.fanStopButton.clicked.disconnect()
+        self.ui.ledStartButton.clicked.disconnect()
+        self.ui.ledStopButton.clicked.disconnect()
+        self.ui.fpStartButton.clicked.disconnect()
+        self.ui.fpStopButton.clicked.disconnect()
+        self.ui.buttonStartButton.clicked.disconnect()
+        self.ui.buttonStopButton.clicked.disconnect()
+        self.ui.irStartButton.clicked.disconnect()
+        self.ui.irStopButton.clicked.disconnect()
+        self.ui.hdcpStartButton.clicked.disconnect()
+        self.ui.uiUpdateStartButton.clicked.disconnect()
+
 
     def connectTheSTB(self):
         print "Connecting to telnet ... "
@@ -328,6 +363,7 @@ class SkedYesUI(QtGui.QMainWindow):
         option = ""
         value = ""
         msg = ""
+        self.msgQ = Queue()
         self.ptcHandlingThread = getPTCThread(self.msgQ, self.telnetcli,option,value,msg )
         self.connect(self.ptcHandlingThread, SIGNAL("uiUpdateProcess(QString,QString,QString)"),self.uiUpdateProcess)
         self.ui.disconnectButton.clicked.connect(self.disconectTheSTB)
@@ -475,6 +511,7 @@ class SkedYesUI(QtGui.QMainWindow):
         self.ui.ledStopButton.setEnabled(False)
 
     def startFpTest(self):
+        print("startFpTest Called ")
         self.tunerTestOptionUpdate()
         self.msgQ.put("startFpTest")
         self.ui.fpStartButton.setEnabled(False)
