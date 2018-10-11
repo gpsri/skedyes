@@ -160,13 +160,13 @@ class SkedTelnet():
         except:
             print "There is not connection "
 
-    def telread(self,string):
-        return self.tn.read_until(string)
-    def telexit(self):
-        self.tn.write("exit" "\r\n")
-        return self.tn.read_all()
+    def telExit(self):
+        #self.tn.write("exit\r\n")
+        #self.tn.read_all()
+        self.tn.close()
 
-#giving problem in windows - disable it for now 
+
+#giving problem in windows - disable it for now
 
 '''
 #user = raw_input("Enter user name:")

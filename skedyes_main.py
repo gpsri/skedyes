@@ -267,7 +267,8 @@ class SkedYesUI(QtGui.QMainWindow):
     def disconectTheSTB(self):
         self.telnetcli.telWrite('\x03') #ctrl + c
         time.sleep(1)
-        self.telnetcli.telWrite("exit") #Exit
+        #self.telnetcli.telWrite("exit") #Exit
+        self.telnetcli.telExit() # close the telenet connection
         self.ptcHandlingThread.stopThread()
         self.ui.connectToStbButton.setEnabled(True)
         self.ui.disconnectButton.setEnabled(False)
