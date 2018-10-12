@@ -62,6 +62,25 @@ def ptc_ui_to_num_options(uioption):
         "updateTelnetEditor" : 6
     }. get("default", 99)
 
+class ptcTestIdx:
+    HDD_TEST = 0
+    USB_TEST = 1
+    SMC_TEST = 2
+    FAN_TEST = 3
+    LNB_TEST = 4
+    TUNER_TEST = 5
+    VFD_TEST = 6
+    BUTTON_TEST = 7
+    LED_TEST = 8
+    IR_TEST = 9
+    HDCP_PRG = 10
+    UI_PRG = 11
+    current_idx = 0
+    test_item_list = [HDD_TEST,USB_TEST,SMC_TEST,FAN_TEST,
+                LNB_TEST,TUNER_TEST,VFD_TEST,BUTTON_TEST, LED_TEST,IR_TEST,HDCP_PRG,UI_PRG]
+    testProgressFlag = False
+
+
 class getPTCThread(QThread):
     def __init__(self,msgQ ,telnetcli, option,value, msg ):
         QThread.__init__(self)
@@ -82,6 +101,7 @@ class getPTCThread(QThread):
             msg = self.msgQ.get()
             print " %s " % msg
             if(msg == "startTunerTest"):
+                ptcTestIdx.testProgressFlag = True
                 ret = stbPerformTunerTest(self,self.telnetcli)
                 if(ret > 0):
                     print "Tuner Test Passed"
@@ -89,9 +109,13 @@ class getPTCThread(QThread):
                 else:
                     print "Tuner Test Failed"
                     self.ptc_update_msg("updateTunerTestResult","FAIL",'')
+                ptcTestIdx.testProgressFlag = False
             elif (msg == "stopTunerTest"):
-                    stbStopTunerTest(self,self.telnetcli)
+                ptcTestIdx.testProgressFlag = True
+                stbStopTunerTest(self,self.telnetcli)
+                ptcTestIdx.testProgressFlag = False
             elif(msg == "startHddTest"):
+                ptcTestIdx.testProgressFlag = True
                 ret = stbPerformHddTest(self,self.telnetcli)
                 if(ret > 0):
                     print "HDD Test Passed"
@@ -99,7 +123,9 @@ class getPTCThread(QThread):
                 else:
                     print "HDD Test Failed"
                     self.ptc_update_msg("updateHddTestResult","FAIL",'')
+                ptcTestIdx.testProgressFlag = False
             elif (msg == "startUsbTest"):
+                ptcTestIdx.testProgressFlag = True
                 ret = stbPerformUsbTest(self,self.telnetcli)
                 if(ret > 0):
                     print "USB Test Passed"
@@ -107,10 +133,14 @@ class getPTCThread(QThread):
                 else:
                     print "USB Test Failed"
                     self.ptc_update_msg("updateUsbTestResult","FAIL",'')
+                ptcTestIdx.testProgressFlag = False
             elif (msg == "stopUsbTest"):
-                print "stopUsbTest"
+                ptcTestIdx.testProgressFlag = True
+                print ("stopUsbTest")
                 stbStopUsbTest(self,self.telnetcli)
+                ptcTestIdx.testProgressFlag = False
             elif (msg == "startSmartcardTest"):
+                ptcTestIdx.testProgressFlag = True
                 ret = stbPerformSmartcardTest(self,self.telnetcli)
                 if(ret > 0):
                     print "Smartcard Test Passed"
@@ -118,10 +148,14 @@ class getPTCThread(QThread):
                 else:
                     print "Smartcard Test Failed"
                     self.ptc_update_msg("updateSmartcardTestResult","FAIL",'')
+                ptcTestIdx.testProgressFlag = False
             elif  (msg == "stopSmartcardTest"):
-                 print "stopSmartcardTest"
-                 stbStopSmartcardTest(self,self.telnetcli)
+                ptcTestIdx.testProgressFlag = True
+                print "stopSmartcardTest"
+                stbStopSmartcardTest(self,self.telnetcli)
+                ptcTestIdx.testProgressFlag = False
             elif (msg == "startFanTest"):
+                ptcTestIdx.testProgressFlag = True
                 ret = stbPerformFanTest(self,self.telnetcli)
                 if(ret > 0):
                     print "Fan Test Passed"
@@ -129,10 +163,14 @@ class getPTCThread(QThread):
                 else:
                     print "Fan Test Failed"
                     self.ptc_update_msg("updateFanTestResult","FAIL",'')
+                ptcTestIdx.testProgressFlag = False
             elif  (msg == "stopFanTest"):
-                 print "stopFanTest"
-                 stbStopFanTest(self,self.telnetcli)
+                ptcTestIdx.testProgressFlag = True
+                print "stopFanTest"
+                stbStopFanTest(self,self.telnetcli)
+                ptcTestIdx.testProgressFlag = False
             elif (msg == "startLedTest"):
+                ptcTestIdx.testProgressFlag = True
                 ret = stbPerformLedTest(self,self.telnetcli)
                 if(ret > 0):
                     print "Led Test Passed"
@@ -140,10 +178,14 @@ class getPTCThread(QThread):
                 else:
                     print "Led Test Failed"
                     self.ptc_update_msg("updateLedTestResult","FAIL",'')
+                ptcTestIdx.testProgressFlag = False
             elif  (msg == "stopLedTest"):
-                 print "stopLedTest"
-                 stbStopLedTest(self,self.telnetcli)
+                ptcTestIdx.testProgressFlag = True
+                print "stopLedTest"
+                stbStopLedTest(self,self.telnetcli)
+                ptcTestIdx.testProgressFlag = False
             elif (msg == "startFpTest"):
+                ptcTestIdx.testProgressFlag = True
                 ret = stbPerformFpTest(self,self.telnetcli)
                 if(ret > 0):
                     print "Fp Test Passed"
@@ -151,10 +193,14 @@ class getPTCThread(QThread):
                 else:
                     print "Fp Test Failed"
                     self.ptc_update_msg("updateFpTestResult","FAIL",'')
+                ptcTestIdx.testProgressFlag = False
             elif  (msg == "stopFpTest"):
+                ptcTestIdx.testProgressFlag = True
                 print "stopFpTest"
                 stbStopFpTest(self,self.telnetcli)
+                ptcTestIdx.testProgressFlag = False
             elif (msg == "startButtonTest"):
+                ptcTestIdx.testProgressFlag = True
                 ret = stbPerformButtonTest(self,self.telnetcli)
                 if(ret > 0):
                     print "Button Test Passed"
@@ -162,11 +208,14 @@ class getPTCThread(QThread):
                 else:
                     print "Button Test Failed"
                     self.ptc_update_msg("updateButtonTestResult","FAIL",'')
+                ptcTestIdx.testProgressFlag = False
             elif  (msg == "stopButtonTest"):
+                ptcTestIdx.testProgressFlag = True
                 print "stopButtonTest"
                 stbStopButtonTest(self,self.telnetcli)
-
+                ptcTestIdx.testProgressFlag = False
             elif (msg == "startIrTest"):
+                ptcTestIdx.testProgressFlag = True
                 ret = stbPerformIrTest(self,self.telnetcli)
                 if(ret > 0):
                     print "IR Test Passed"
@@ -174,12 +223,14 @@ class getPTCThread(QThread):
                 else:
                     print "IR Test Failed"
                     self.ptc_update_msg("updateIrTestResult","FAIL",'')
+                ptcTestIdx.testProgressFlag = False
             elif  (msg == "stopIrTest"):
+                ptcTestIdx.testProgressFlag = True
                 print "stopIrTest"
                 stbStopIrTest(self,self.telnetcli)
-
+                ptcTestIdx.testProgressFlag = False
             elif (msg == "startHdcpKeyProgram"):
-
+                ptcTestIdx.testProgressFlag = True
                 ret = stbPerformHdcpKeyProgramming(self,self.telnetcli)
                 if(ret > 0):
                     print "HDCP Key Program Passed"
@@ -187,7 +238,9 @@ class getPTCThread(QThread):
                 else:
                     print "HDCP Key Program Failed"
                     self.ptc_update_msg("updateHdcpKeyResult","FAIL",'')
+                ptcTestIdx.testProgressFlag = False
             elif  (msg == "startUiUpgrade"):
+                ptcTestIdx.testProgressFlag = True
                 print "startUiUpgrade"
                 ret = stbPerformUiUpgrade(self,self.telnetcli)
                 if(ret > 0):
@@ -196,7 +249,9 @@ class getPTCThread(QThread):
                 else:
                     print "IR Test Failed"
                     self.ptc_update_msg("updateUiUpgradeResult","FAIL",'')
+                ptcTestIdx.testProgressFlag = False
             elif  (msg == "startLnbTest"):
+                ptcTestIdx.testProgressFlag = True
                 print "startLnbTest"
                 ret = stbPerformLnbTest(self,self.telnetcli)
                 if(ret > 0):
@@ -205,7 +260,7 @@ class getPTCThread(QThread):
                 else:
                     print "LNB Test Failed"
                     self.ptc_update_msg("updateLnbTestResult","FAIL",'')
-
+                ptcTestIdx.testProgressFlag = False
             #print " %s" % ( time.ctime(time.time()))
             #timenow = '%s' % (time.ctime(time.time()))
             #self.ptc_update_msg("updateClock",timenow,"")
@@ -265,6 +320,21 @@ class SkedYesUI(QtGui.QMainWindow):
         self.ui.lnbResult.setStyleSheet("QLabel { background-color : silver; color : gray; }");
 
 
+    def keyPressEvent(self, event):
+        print("keyPressEvent")
+        print(event.key())
+        if event.key() == QtCore.Qt.Key_Q:
+            print "Killing"
+            self.deleteLater()
+        elif event.key() == QtCore.Qt.Key_Enter or event.key() == QtCore.Qt.Key_Return:
+            self.proceed()
+            event.accept()
+
+    def proceed(self):
+        print "Call Enter Key"
+        if ptcTestIdx.testProgressFlag == False:
+            self.handleKeyEnter()
+
     def disconectTheSTB(self):
 
         while self.msgQ.empty() == False:
@@ -284,9 +354,63 @@ class SkedYesUI(QtGui.QMainWindow):
         self.resetValues()
 
 
+    def setFocus(self):
+        if(ptcTestIdx.current_idx == ptcTestIdx.HDD_TEST ):
+            self.ui.labelHddTest.setStyleSheet("QLabel { background-color : orange; color : white; }");
+        if(ptcTestIdx.current_idx == ptcTestIdx.USB_TEST ):
+            self.ui.labelUsbTest.setStyleSheet("QLabel { background-color : orange; color : white; }");
+        if(ptcTestIdx.current_idx == ptcTestIdx.SMC_TEST ):
+            self.ui.labelSmartcardTest.setStyleSheet("QLabel { background-color : orange; color : white; }");
+        if(ptcTestIdx.current_idx == ptcTestIdx.FAN_TEST ):
+            self.ui.labelFanTest.setStyleSheet("QLabel { background-color : orange; color : white; }");
+        if(ptcTestIdx.current_idx == ptcTestIdx.LNB_TEST ):
+            self.ui.labelLnbTest.setStyleSheet("QLabel { background-color : orange; color : white; }");
+        if(ptcTestIdx.current_idx == ptcTestIdx.TUNER_TEST ):
+            self.ui.labelTunerTest.setStyleSheet("QLabel { background-color : orange; color : white; }");
+        if(ptcTestIdx.current_idx == ptcTestIdx.VFD_TEST ):
+            self.ui.labelFpTest.setStyleSheet("QLabel { background-color : orange; color : white; }");
+        if(ptcTestIdx.current_idx == ptcTestIdx.BUTTON_TEST ):
+            self.ui.labelButtonTest.setStyleSheet("QLabel { background-color : orange; color : white; }");
+        if(ptcTestIdx.current_idx == ptcTestIdx.LED_TEST ):
+            self.ui.labelLedTest.setStyleSheet("QLabel { background-color : orange; color : white; }");
+        if(ptcTestIdx.current_idx == ptcTestIdx.IR_TEST ):
+            self.ui.labelIrTest.setStyleSheet("QLabel { background-color : orange; color : white; }");
+        if(ptcTestIdx.current_idx == ptcTestIdx.HDCP_PRG ):
+            self.ui.handleHDCPLabel.setStyleSheet("QLabel { background-color : orange; color : white; }");
+        if(ptcTestIdx.current_idx == ptcTestIdx.UI_PRG ):
+            self.ui.handleAppSwUpdate.setStyleSheet("QLabel { background-color : orange; color : white; }");
 
+
+    def clearFocus(self):
+        if(ptcTestIdx.current_idx == ptcTestIdx.HDD_TEST ):
+            self.ui.labelHddTest.setStyleSheet("none");
+        if(ptcTestIdx.current_idx == ptcTestIdx.USB_TEST ):
+            self.ui.labelUsbTest.setStyleSheet("none");
+        if(ptcTestIdx.current_idx == ptcTestIdx.SMC_TEST ):
+            self.ui.labelSmartcardTest.setStyleSheet("none");
+        if(ptcTestIdx.current_idx == ptcTestIdx.FAN_TEST ):
+            self.ui.labelFanTest.setStyleSheet("none");
+        if(ptcTestIdx.current_idx == ptcTestIdx.LNB_TEST ):
+            self.ui.labelLnbTest.setStyleSheet("none");
+        if(ptcTestIdx.current_idx == ptcTestIdx.TUNER_TEST ):
+            self.ui.labelTunerTest.setStyleSheet("none");
+        if(ptcTestIdx.current_idx == ptcTestIdx.VFD_TEST ):
+            self.ui.labelFpTest.setStyleSheet("none");
+        if(ptcTestIdx.current_idx == ptcTestIdx.BUTTON_TEST ):
+            self.ui.labelButtonTest.setStyleSheet("none");
+        if(ptcTestIdx.current_idx == ptcTestIdx.LED_TEST ):
+            self.ui.labelLedTest.setStyleSheet("none");
+        if(ptcTestIdx.current_idx == ptcTestIdx.IR_TEST ):
+            self.ui.labelIrTest.setStyleSheet("none");
+        if(ptcTestIdx.current_idx == ptcTestIdx.HDCP_PRG ):
+            self.ui.handleHDCPLabel.setStyleSheet("none");
+        if(ptcTestIdx.current_idx == ptcTestIdx.UI_PRG ):
+            self.ui.handleAppSwUpdate.setStyleSheet("none");
 
     def resetValues(self):
+
+        self.clearFocus()
+            #self.buttonClearFocus(self.ui.irStartButton)
         self.ui.disconnectButton.setEnabled(False)
         self.ui.tunerStopButton.setEnabled(False)
         self.ui.lnbStopButton.setEnabled(False)
@@ -407,6 +531,9 @@ class SkedYesUI(QtGui.QMainWindow):
 
     def startTunerTest(self):
         self.msgQ.put("startTunerTest")
+        self.clearFocus()
+        ptcTestIdx.current_idx = ptcTestIdx.TUNER_TEST
+        self.setFocus()
         self.ui.tunerStartButton.setEnabled(False)
         self.ui.tunerResult.setStyleSheet("QLabel { background-color : gray; color : black; }");
         self.ui.tunerStopButton.setEnabled(True)
@@ -418,6 +545,9 @@ class SkedYesUI(QtGui.QMainWindow):
 
     def startLnbTest(self):
         self.msgQ.put("startLnbTest")
+        self.clearFocus()
+        ptcTestIdx.current_idx = ptcTestIdx.LNB_TEST
+        self.setFocus()
         self.ui.lnbStartButton.setEnabled(False)
         self.ui.lnbResult.setStyleSheet("QLabel { background-color : gray; color : black; }");
         self.ui.lnbStopButton.setEnabled(True)
@@ -429,6 +559,9 @@ class SkedYesUI(QtGui.QMainWindow):
 
     def startButtonTest(self):
         self.msgQ.put("startButtonTest")
+        self.clearFocus()
+        ptcTestIdx.current_idx = ptcTestIdx.BUTTON_TEST
+        self.setFocus()
         self.tunerTestOptionUpdate()
         self.ui.buttonStartButton.setEnabled(False)
         self.ui.buttonResult.setStyleSheet("QLabel { background-color : gray; color : black; }");
@@ -442,6 +575,9 @@ class SkedYesUI(QtGui.QMainWindow):
 
     def startIrTest(self):
         self.msgQ.put("startIrTest")
+        self.clearFocus()
+        ptcTestIdx.current_idx = ptcTestIdx.IR_TEST
+        self.setFocus()
         self.tunerTestOptionUpdate()
         self.ui.irStartButton.setEnabled(False)
         self.ui.irResult.setStyleSheet("QLabel { background-color : gray; color : black; }");
@@ -456,6 +592,8 @@ class SkedYesUI(QtGui.QMainWindow):
     def startHddTest(self):
         self.tunerTestOptionUpdate()
         self.msgQ.put("startHddTest")
+        ptcTestIdx.current_idx = ptcTestIdx.HDD_TEST
+        self.setFocus()
         self.ui.hddStartButton.setEnabled(False)
         self.ui.hddResult.setStyleSheet("QLabel { background-color : gray; color : black; }");
         self.ui.hddStopButton.setEnabled(True)
@@ -468,9 +606,13 @@ class SkedYesUI(QtGui.QMainWindow):
     def startUsbTest(self):
         self.tunerTestOptionUpdate()
         self.msgQ.put("startUsbTest")
+        self.clearFocus()
+        ptcTestIdx.current_idx = ptcTestIdx.USB_TEST
+        self.setFocus()
         self.ui.usbStartButton.setEnabled(False)
         self.ui.usbStopButton.setEnabled(True)
         self.ui.usbResult.setStyleSheet("QLabel { background-color : gray; color : black; }");
+
     def stopUsbTest(self):
         self.ui.usbStartButton.setEnabled(True)
         self.ui.usbStopButton.setEnabled(False)
@@ -479,8 +621,12 @@ class SkedYesUI(QtGui.QMainWindow):
     def startSmartcardTest(self):
         self.tunerTestOptionUpdate()
         self.msgQ.put("startSmartcardTest")
+        self.clearFocus()
+        ptcTestIdx.current_idx = ptcTestIdx.SMC_TEST
+        self.setFocus()
         self.ui.smartcardStartButton.setEnabled(False)
         self.ui.smartcardResult.setStyleSheet("QLabel { background-color : gray; color : black; }");
+
     def stopSmartcardTest(self):
         self.ui.smartcardStartButton.setEnabled(True)
         self.msgQ.put("stopSmartcardTest")
@@ -488,7 +634,10 @@ class SkedYesUI(QtGui.QMainWindow):
 
     def startFanTest(self):
         self.tunerTestOptionUpdate()
+        self.clearFocus()
         self.msgQ.put("startFanTest")
+        ptcTestIdx.current_idx = ptcTestIdx.FAN_TEST
+        self.setFocus()
         self.ui.fanStartButton.setEnabled(False)
         self.ui.fanResult.setStyleSheet("QLabel { background-color : gray; color : black; }");
         self.ui.fanStopButton.setEnabled(True)
@@ -500,7 +649,10 @@ class SkedYesUI(QtGui.QMainWindow):
 
     def startLedTest(self):
         self.tunerTestOptionUpdate()
+        self.clearFocus()
         self.msgQ.put("startLedTest")
+        ptcTestIdx.current_idx = ptcTestIdx.LED_TEST
+        self.setFocus()
         self.ui.ledStartButton.setEnabled(False)
         self.ui.ledResult.setStyleSheet("QLabel { background-color : gray; color : black; }");
         self.ui.ledStopButton.setEnabled(True)
@@ -511,12 +663,17 @@ class SkedYesUI(QtGui.QMainWindow):
         self.ui.ledStopButton.setEnabled(False)
 
     def startFpTest(self):
-        print("startFpTest Called ")
         self.tunerTestOptionUpdate()
+        self.clearFocus()
         self.msgQ.put("startFpTest")
+        ptcTestIdx.current_idx = ptcTestIdx.VFD_TEST
+        self.setFocus()
         self.ui.fpStartButton.setEnabled(False)
         self.ui.fpResult.setStyleSheet("QLabel { background-color : gray; color : black; }");
+        #self.ui.fpStartButton.setStyleSheet("QPushButton { background-color : yellow; color : black; }");
+
         self.ui.fpStopButton.setEnabled(True)
+
 
     def stopFpTest(self):
         self.ui.fpStartButton.setEnabled(True)
@@ -525,13 +682,19 @@ class SkedYesUI(QtGui.QMainWindow):
 
     def startHdcpKeyProgram(self):
         self.tunerTestOptionUpdate()
+        self.clearFocus()
         self.msgQ.put("startHdcpKeyProgram")
+        ptcTestIdx.current_idx = ptcTestIdx.HDCP_PRG
+        self.setFocus()
         self.ui.hdcpStartButton.setEnabled(False)
         self.ui.hdcpKeyResult.setStyleSheet("QLabel { background-color : gray; color : black; }");
 
     def startUiUpgrade(self):
         self.tunerTestOptionUpdate()
+        self.clearFocus()
         self.msgQ.put("startUiUpgrade")
+        ptcTestIdx.current_idx = ptcTestIdx.UI_PRG
+        self.setFocus()
         self.ui.uiUpdateStartButton.setEnabled(False)
         self.ui.uiUpgradeResult.setStyleSheet("QLabel { background-color : gray; color : black; }");
 
@@ -600,7 +763,72 @@ class SkedYesUI(QtGui.QMainWindow):
         elif (option == "updateUiUpgradeResult"):
             self.updateUiUpgradeResult(value)
 
+    def buttonSetFocus(self,buttonObject):
+        #buttonObject.setGeometry(QtCore.QRect(440, 270, 80, 40))
+        buttonObject.setStyleSheet("QPushButton { background-color : yellow; color : black; }");
 
+    def buttonClearFocus(self,buttonObject):
+        buttonObject.setStyleSheet("none");
+
+    def handleKeyEnter(self):
+        if ptcTestIdx.current_idx == ptcTestIdx.LNB_TEST:
+            if(self.ui.autoTestButton.isChecked()):
+                self.startTunerTest()
+        elif ptcTestIdx.current_idx == ptcTestIdx.TUNER_TEST:
+            if(self.ui.autoTestButton.isChecked()):
+                self.startFpTest()
+        elif ptcTestIdx.current_idx == ptcTestIdx.VFD_TEST:
+            if(self.ui.autoTestButton.isChecked()):
+                self.startButtonTest()
+        elif ptcTestIdx.current_idx == ptcTestIdx.BUTTON_TEST:
+            if(self.ui.autoTestButton.isChecked()):
+                self.startLedTest()
+
+        elif ptcTestIdx.current_idx == ptcTestIdx.LED_TEST:
+            if(self.ui.autoTestButton.isChecked()):
+                self.startIrTest()
+
+        elif ptcTestIdx.current_idx == ptcTestIdx.IR_TEST:
+            if(self.ui.autoTestButton.isChecked()):
+                self.startHdcpKeyProgram()
+
+        elif ptcTestIdx.current_idx == ptcTestIdx.HDCP_PRG:
+            if(self.ui.autoTestButton.isChecked()):
+                self.startUiUpgrade()
+
+        '''
+        #for i in ptcTestIdx.test_item_list:
+        #    if ptcTestIdx.current_idx == i:
+                # setFocus
+        #    else:
+                #clear focus
+
+            self.ui.disconnectButton.clicked.disconnect()
+            self.ui.tunerStartButton.clicked.disconnect()
+            self.ui.tunerStopButton.clicked.disconnect()
+
+            self.ui.lnbStartButton.clicked.disconnect()
+            self.ui.lnbStopButton.clicked.disconnect()
+
+            self.ui.hddStartButton.clicked.disconnect()
+            self.ui.hddStopButton.clicked.disconnect()
+            self.ui.usbStartButton.clicked.disconnect()
+            self.ui.usbStopButton.clicked.disconnect()
+            self.ui.smartcardStartButton.clicked.disconnect()
+            self.ui.smartcardStopButton.clicked.disconnect()
+            self.ui.fanStartButton.clicked.disconnect()
+            self.ui.fanStopButton.clicked.disconnect()
+            self.ui.ledStartButton.clicked.disconnect()
+            self.ui.ledStopButton.clicked.disconnect()
+            self.ui.fpStartButton.clicked.disconnect()
+            self.ui.fpStopButton.clicked.disconnect()
+            self.ui.buttonStartButton.clicked.disconnect()
+            self.ui.buttonStopButton.clicked.disconnect()
+            self.ui.irStartButton.clicked.disconnect()
+            self.ui.irStopButton.clicked.disconnect()
+            self.ui.hdcpStartButton.clicked.disconnect()
+            self.ui.uiUpdateStartButton.clicked.disconnect()
+    '''
     def updateConnectionStatus(self,text):
         connectionstr = "Telnet Connection Status : "
         connectionstr = connectionstr + text
@@ -685,7 +913,10 @@ class SkedYesUI(QtGui.QMainWindow):
         elif(text == "FAIL"):
             self.ui.hdcpKeyResult.setStyleSheet("QLabel { background-color : red; color : white; }");
             self.ui.hdcpKeyResult.setText("FAIL")
-        self.ui.hdcpStartButton.setEnabled(True)
+        if(self.ui.autoTestButton.isChecked()):
+            print ("do nothing")
+        else:
+            self.ui.hdcpStartButton.setEnabled(True)
 
 
     def updateUiUpgradeResult(self,text):
@@ -728,6 +959,7 @@ class SkedYesUI(QtGui.QMainWindow):
         elif(text == "FAIL"):
             self.ui.irResult.setStyleSheet("QLabel { background-color : red; color : white; }");
             self.ui.irResult.setText("FAIL")
+
         self.ui.irStartButton.setEnabled(True)
         self.ui.irStopButton.setEnabled(False)
 
@@ -761,6 +993,7 @@ class SkedYesUI(QtGui.QMainWindow):
         self.ui.ledStartButton.setEnabled(True)
         self.ui.ledStopButton.setEnabled(False)
 
+
     def updateLedTestProgress(self,text, value):
         self.ui.ledTestProgressbar.setProperty("value",value)
         self.ui.statusMsgLabel.setText("LED Test :")
@@ -790,8 +1023,6 @@ class SkedYesUI(QtGui.QMainWindow):
 
         self.ui.lnbStartButton.setEnabled(True)
         self.ui.lnbStopButton.setEnabled(False)
-        #if(self.ui.autoTestButton.isChecked()):
-        #    self.startTunerTest()
 
     def updateLnbTestProgress(self,text, value):
         self.ui.lnbTestProgressbar.setProperty("value",value)
@@ -1572,6 +1803,7 @@ try:
 except AttributeError:
     def _fromUtf8(s):
         return s
+
 
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
