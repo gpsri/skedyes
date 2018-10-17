@@ -1628,6 +1628,7 @@ def stbPerformHdcpKeyProgramming(app,tel):
                     match1 = re.search(hdcpKeyResponseMatchString5,data)
                     if  match1:
                         app.ptc_update_msg("updateHdcpKeyResult","FAIL","")
+                        myapp.ui.revertMACAddress(myapp.ui)
                         return 0
                     elif match:
                         #verify the Keys 1.x
@@ -1638,6 +1639,7 @@ def stbPerformHdcpKeyProgramming(app,tel):
                         if match:
                             print "HDCP 1.x Validation Fail Please check the mac address"
                             app.ptc_update_msg("updateHdcpKeyResult","FAIL","")
+                            myapp.ui.revertMACAddress(myapp.ui)
                             return 0
                         #verify the Keys 2.x
                         tel.telWrite(command_list[TestCommnad.VERIFY_HDCP_2X])
@@ -1647,9 +1649,11 @@ def stbPerformHdcpKeyProgramming(app,tel):
                         if match:
                             print "HDCP 2.x Validation Fail Please check the mac address"
                             app.ptc_update_msg("updateHdcpKeyResult","FAIL","")
+                            myapp.ui.revertMACAddress(myapp.ui)
                             return 0
 
                         app.ptc_update_msg("updateHdcpKeyResult","PASS","")
+                        myapp.ui.rmMACAddress(myapp.ui)
                         return 1
 
                     else:
