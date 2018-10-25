@@ -87,7 +87,8 @@ def buildCommandList():
     command_list.append("/root/htp/fan_speed " ) # FAN_TEST_CMD5 = 19
     command_list.append("rmmod mstcgio" ) # REMOVER_FAN_TEST_MODULE_CMD1 = 20
     command_list.append("lsmod" ) # REMOVER_FAN_TEST_MODULE_CMD2 = 21
-    command_list.append("/root/htp/live -sat 8pskldpc -sym 7200000 -freq 1899") # TUNE_TEST = 22
+    #command_list.append("/root/htp/live -sat 8pskldpc -sym 7200000 -freq 1899") # TUNE_TEST = 22
+    command_list.append("/root/htp/live -sat 8pskldpc -sym 27500000 -freq 2150") # TUNE_TEST = 22
     command_list.append("ctrl+c ") # STOP_TUNE_TEST = 23
     command_list.append("irctl 30" ) # IR_TEST = 24
     command_list.append("/root/htp/gpio_interrupt 4 10 2 1 10" ) # BUTTON_TEST = 25

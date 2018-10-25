@@ -477,6 +477,11 @@ class SkedYesUI(QtGui.QMainWindow):
         self.ui.hdcpStartButton.clicked.disconnect()
         self.ui.uiUpdateStartButton.clicked.disconnect()
 
+        self.ui.fanSpeed.clear()
+        self.ui.lnbValue.clear()
+        self.ui.tunerLnbValue.clear()
+        self.ui.buttonKeysRecivce.clear()
+        self.ui.irKeysRecivce.clear()
 
     def connectTheSTB(self):
         print "Connecting to telnet ... "
@@ -914,7 +919,7 @@ class SkedYesUI(QtGui.QMainWindow):
             self.ui.hdcpKeyResult.setStyleSheet("QLabel { background-color : red; color : white; }");
             self.ui.hdcpKeyResult.setText("FAIL")
         if(self.ui.autoTestButton.isChecked()):
-            print ("do nothing")
+            self.ui.hdcpStartButton.setEnabled(True)
         else:
             self.ui.hdcpStartButton.setEnabled(True)
 
@@ -1812,7 +1817,7 @@ except AttributeError:
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
     myapp = SkedYesUI()
-    myapp.setWindowTitle(_translate("SkedYes", "SKED YES V1.07", None))
+    myapp.setWindowTitle(_translate("SkedYes", "SKED YES V1.08", None))
 
     timenow = '%s' % (time.ctime(time.time()))
     myapp.ui.dateAndTime.setText(timenow)
