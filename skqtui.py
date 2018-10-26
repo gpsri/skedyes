@@ -2,13 +2,11 @@
 
 # Form implementation generated from reading ui file 'skqt.ui'
 #
-# Created by: PyQt4 UI code generator 4.12.3
+# Created by: PyQt4 UI code generator 4.11.4
 #
 # WARNING! All changes made in this file will be lost!
 
 from PyQt4 import QtCore, QtGui
-import string
-import os
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
@@ -595,14 +593,6 @@ class Ui_SkedYes(object):
         font.setWeight(75)
         self.labelMacAddressInput.setFont(font)
         self.labelMacAddressInput.setObjectName(_fromUtf8("labelMacAddressInput"))
-        self.macAddressInputValue = QtGui.QLineEdit(SkedYes)
-        self.macAddressInputValue.setGeometry(QtCore.QRect(140, 450, 120, 20))
-        font = QtGui.QFont()
-        font.setPointSize(8)
-        self.macAddressInputValue.setFont(font)
-        self.macAddressInputValue.setInputMethodHints(QtCore.Qt.ImhPreferUppercase|QtCore.Qt.ImhUppercaseOnly)
-        self.macAddressInputValue.setMaxLength(12)
-        self.macAddressInputValue.setObjectName(_fromUtf8("macAddressInputValue"))
         self.uiUpgradeResult = QtGui.QLabel(SkedYes)
         self.uiUpgradeResult.setGeometry(QtCore.QRect(270, 510, 48, 20))
         font = QtGui.QFont()
@@ -871,6 +861,10 @@ class Ui_SkedYes(object):
         self.tunerLnbValue.setFrameShape(QtGui.QFrame.NoFrame)
         self.tunerLnbValue.setFrameShadow(QtGui.QFrame.Sunken)
         self.tunerLnbValue.setObjectName(_fromUtf8("tunerLnbValue"))
+        self.macAddressInputValue = QtGui.QLabel(SkedYes)
+        self.macAddressInputValue.setGeometry(QtCore.QRect(140, 450, 120, 20))
+        self.macAddressInputValue.setText(_fromUtf8(""))
+        self.macAddressInputValue.setObjectName(_fromUtf8("macAddressInputValue"))
 
         self.retranslateUi(SkedYes)
         QtCore.QObject.connect(self.exitButton, QtCore.SIGNAL(_fromUtf8("clicked()")), SkedYes.close)
@@ -934,8 +928,7 @@ class Ui_SkedYes(object):
         self.buttonResult.setText(_translate("SkedYes", "PASS", None))
         self.irKeysRecivce.setText(_translate("SkedYes", "Key:", None))
         self.buttonKeysRecivce.setText(_translate("SkedYes", "Key:", None))
-        self.labelMacAddressInput.setText(_translate("SkedYes", "Enter MAC Addr", None))
-        self.macAddressInputValue.setText(_translate("SkedYes", "0010057E", None))
+        self.labelMacAddressInput.setText(_translate("SkedYes", "MAC Addr", None))
         self.uiUpgradeResult.setText(_translate("SkedYes", "PASS", None))
         self.hdcpKeyResult.setText(_translate("SkedYes", "PASS", None))
         self.tunerStopButton.setText(_translate("SkedYes", "Stop", None))
@@ -948,110 +941,4 @@ class Ui_SkedYes(object):
         self.lnbResult.setText(_translate("SkedYes", "PASS", None))
         self.lnbStartButton.setText(_translate("SkedYes", "Start", None))
         self.tunerLnbValue.setText(_translate("SkedYes", "V:13 22Khz: OFF", None))
-        if os.path.isfile("mac/mac.lst") == False:
-            self.generateMacList(SkedYes)
-        self.readMACAddress(SkedYes)
 
-    def generateMacList(self, SkedYes):
-
-        list_cfg = []
-        start_str = ""
-        end_str = ""
-        fp = open("mac/mac.cfg", "r")
-        line = fp.readline()
-        while line:
-            list_cfg.append(line)
-            line = fp.readline()
-        fp.close()
-        len_cfg_arg = len(list_cfg)
-        idx = 0
-        while idx < len_cfg_arg:
-            if list_cfg[idx].find("start_mac=") != -1:
-                start_str = list_cfg[idx][list_cfg[idx].find("start_mac=0x")+len("start_mac=0x"):]
-                print "Start Mac:", start_str
-            if list_cfg[idx].find("end_mac=") != -1:
-                end_str = list_cfg[idx][list_cfg[idx].find("end_mac=0x")+len("end_mac=0x"):]
-                print "End Mac:", end_str
-            idx = idx + 1
-        start_hex = string.atoi(start_str, 16)
-        end_hex = string.atoi(end_str, 16)
-        lenofmaclist = end_hex - start_hex + 1
-        if lenofmaclist % 2 != 0 :
-            lenofmaclist = lenofmaclist - 1
-        print "start(hex):", start_hex, "end(hex):", end_hex, "length of list : ", lenofmaclist
-        fp = open("mac/mac.lst", "w")
-        idx = 0
-        fixbit = 0
-        while idx < lenofmaclist:
-            mac = "{0:x}".format(start_hex)
-            fixbit = len(mac)
-            while fixbit < 12:
-                mac = "0" + mac
-                fixbit = fixbit + 1
-
-            fp.write(mac + " --0\n")
-            start_hex = start_hex + 2
-            idx = idx + 2
-        fp.close()
-
-    mac_list = []
-    index_mac_list = 0
-
-    def revertMACAddress(self, SkedYes):
-        fp = open("mac/mac.lst", "w+")
-        file_line = len(self.mac_list)
-        idx = 0
-
-        while file_line > idx :
-            if idx == self.index_mac_list :
-                self.mac_list[idx] = self.mac_list[idx].replace("--tmp", "--0", 1)
-            fp.write(self.mac_list[idx])
-            idx = idx + 1
-
-        fp.close()
-        self.readMACAddress(SkedYes)
-
-    def rmMACAddress(self, SkedYes):
-        fp = open("mac/mac.lst", "w+")
-        file_line = len(self.mac_list)
-        idx = 0
-        print "rmMACAddress"
-
-        while file_line > idx :
-            if idx == self.index_mac_list :
-                self.mac_list[idx] = self.mac_list[idx].replace("--tmp", "--1", 1)
-            fp.write(self.mac_list[idx])
-            idx = idx + 1
-
-        fp.close()
-        self.readMACAddress(SkedYes)
-
-    def readMACAddress(self, SkedYes):
-        index_mac_list = 0
-        self.mac_list = []
-        fp = open("mac/mac.lst", "r")
-        line = fp.readline()
-        while line:
-            self.mac_list.append(line)
-            line = fp.readline()
-
-        file_line = len(self.mac_list)
-        idx = 0
-        mac = ""
-        flag_find_mac = False
-        print "Line of record:", file_line
-        while file_line > idx:
-            if self.mac_list[idx].count("--0") == 1 :
-                mac = self.mac_list[idx][0:12]
-                self.mac_list[idx] = self.mac_list[idx].replace("--0", "--tmp", 1)
-                self.index_mac_list = idx
-                print "-->", self.mac_list[idx], "--->", mac
-                flag_find_mac = True
-                break
-            idx = idx + 1
-        fp.close()
-        if flag_find_mac == False:
-            self.macAddressInputValue.setText(_translate("SkedYes", "no mac address", None))
-            return
-
-        self.macAddressInputValue.setText(_translate("SkedYes", mac.upper(), None))

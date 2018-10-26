@@ -9,6 +9,7 @@ from threading import Thread, Lock
 import xml.etree.ElementTree as ET
 #from sklearn import tree
 import re
+import os
 import signal
 from Queue import Queue
 
@@ -482,6 +483,8 @@ class SkedYesUI(QtGui.QMainWindow):
         self.ui.tunerLnbValue.clear()
         self.ui.buttonKeysRecivce.clear()
         self.ui.irKeysRecivce.clear()
+        self.ui.hdcpStartButton.setEnabled(True)
+        self.ui.macAddressInputValue.clear()
 
     def connectTheSTB(self):
         print "Connecting to telnet ... "
@@ -1569,6 +1572,122 @@ def stbStopIrTest(app,tel):
     tel.telWrite(command_list[TestCommnad.STOP_TUNE_TEST]) # ctrl +c to stop
     time.sleep(2)
 
+mac_list = []
+index_mac_list = 0
+
+def generateMacList():
+
+    list_cfg = []
+    start_str = ""
+    end_str = ""
+    fp = open("mac/mac.cfg", "r")
+    line = fp.readline()
+    while line:
+        list_cfg.append(line)
+        line = fp.readline()
+    fp.close()
+    len_cfg_arg = len(list_cfg)
+
+    idx = 0
+    foundStart = False
+    foundEnd = False
+    while idx < len_cfg_arg:
+        if list_cfg[idx].find("start_mac=") != -1:
+            start_str = list_cfg[idx][list_cfg[idx].find("start_mac=0x")+len("start_mac=0x"):]
+            print "Start Mac:", start_str
+            foundStart = True
+
+        if list_cfg[idx].find("end_mac=") != -1:
+            end_str = list_cfg[idx][list_cfg[idx].find("end_mac=0x")+len("end_mac=0x"):]
+            print "End Mac:", end_str
+            foundEnd = True
+        idx = idx + 1
+    if (foundStart == False or foundEnd == False):
+        return 0
+    start_hex = string.atoi(start_str, 16)
+    end_hex = string.atoi(end_str, 16)
+    lenofmaclist = end_hex - start_hex + 1
+    if lenofmaclist % 2 != 0 :
+        lenofmaclist = lenofmaclist - 1
+    print "start(hex):", start_hex, "end(hex):", end_hex, "length of list : ", lenofmaclist
+    fp = open("mac/mac.lst", "w")
+    idx = 0
+    fixbit = 0
+    while idx < lenofmaclist:
+        mac = "{0:x}".format(start_hex)
+        fixbit = len(mac)
+        while fixbit < 12:
+            mac = "0" + mac
+            fixbit = fixbit + 1
+
+        fp.write(mac + " --0\n")
+        start_hex = start_hex + 2
+        idx = idx + 2
+    fp.close()
+
+
+def revertMACAddress():
+    fp = open("mac/mac.lst", "w+")
+    file_line = len(mac_list)
+    idx = 0
+
+    while file_line > idx :
+        if idx == index_mac_list :
+            temp =  mac_list[idx].replace("--tmp", "--0", 1)
+            fp.write(temp)
+        else :
+            fp.write(mac_list[idx])
+        idx = idx + 1
+
+    fp.close()
+
+def rmMACAddress():
+    fp = open("mac/mac.lst", "w+")
+    file_line = len(mac_list)
+    idx = 0
+
+    while file_line > idx :
+        if idx == index_mac_list :
+            temp = mac_list[idx].replace("--tmp", "--1", 1)
+            fp.write(temp)
+        else :
+            fp.write(mac_list[idx])
+        idx = idx + 1
+
+    fp.close()
+
+def readMACAddress():
+    global index_mac_list, mac_list
+    index_mac_list = 0
+    mac_list = []
+    fp = open("mac/mac.lst", "r")
+    line = fp.readline()
+    while line:
+        mac_list.append(line)
+        line = fp.readline()
+
+    file_line = len(mac_list)
+    idx = 0
+    mac = ""
+    flag_find_mac = False
+    print "Line of record:", file_line
+    while file_line > idx:
+        if mac_list[idx].count("--0") == 1 :
+            mac = mac_list[idx][0:12]
+            mac_list[idx] = mac_list[idx].replace("--0", "--tmp", 1)
+            index_mac_list = idx
+            print "-->", mac_list[idx], "--->", mac
+            flag_find_mac = True
+            break
+        idx = idx + 1
+    fp.close()
+    if flag_find_mac == False:
+        myapp.ui.macAddressInputValue.setText(_translate("SkedYes", "no mac address", None))
+        return 0
+
+    myapp.ui.macAddressInputValue.setText(_translate("SkedYes", mac.upper(), None))
+    return 1
+
 def stbPerformHdcpKeyProgramming(app,tel):
     hdcpKeyResponseMatchString1 = "Get key from key server"
     hdcpKeyResponseMatchString2 = "Key Server IP"
@@ -1577,6 +1696,16 @@ def stbPerformHdcpKeyProgramming(app,tel):
     hdcpKeyResponseMatchString5 = "Handling HDCP key is failed"
     hdcpKeyResponseMatchString6 = "HDCP1.4 key isn't exist"
     hdcpKeyResponseMatchString7 = "HDCP2.2 key isn't exist"
+
+    if os.path.isfile("mac/mac.cfg") == False:
+        app.ptc_update_msg("updateHdcpKeyResult","FAIL","")
+        return 0
+    else :
+        if os.path.isfile("mac/mac.lst") == False:
+            if (generateMacList() == False):
+                return 0
+    if readMACAddress() == False:
+        return 0
 
     print "start hdcp key programming"
     macadd = myapp.ui.macAddressInputValue.text()
@@ -1644,7 +1773,7 @@ def stbPerformHdcpKeyProgramming(app,tel):
                         if match:
                             print "HDCP 1.x Validation Fail Please check the mac address"
                             app.ptc_update_msg("updateHdcpKeyResult","FAIL","")
-                            myapp.ui.revertMACAddress(myapp.ui)
+                            revertMACAddress()
                             return 0
                         #verify the Keys 2.x
                         tel.telWrite(command_list[TestCommnad.VERIFY_HDCP_2X])
@@ -1654,11 +1783,11 @@ def stbPerformHdcpKeyProgramming(app,tel):
                         if match:
                             print "HDCP 2.x Validation Fail Please check the mac address"
                             app.ptc_update_msg("updateHdcpKeyResult","FAIL","")
-                            myapp.ui.revertMACAddress(myapp.ui)
+                            revertMACAddress()
                             return 0
 
                         app.ptc_update_msg("updateHdcpKeyResult","PASS","")
-                        myapp.ui.rmMACAddress(myapp.ui)
+                        rmMACAddress()
                         return 1
 
                     else:
@@ -1817,7 +1946,7 @@ except AttributeError:
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
     myapp = SkedYesUI()
-    myapp.setWindowTitle(_translate("SkedYes", "SKED YES V1.08", None))
+    myapp.setWindowTitle(_translate("SkedYes", "SKED YES V1.09", None))
 
     timenow = '%s' % (time.ctime(time.time()))
     myapp.ui.dateAndTime.setText(timenow)

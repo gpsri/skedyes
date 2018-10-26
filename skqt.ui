@@ -1632,31 +1632,7 @@
     </font>
    </property>
    <property name="text">
-    <string>Enter MAC Addr</string>
-   </property>
-  </widget>
-  <widget class="QLineEdit" name="macAddressInputValue">
-   <property name="geometry">
-    <rect>
-     <x>140</x>
-     <y>450</y>
-     <width>120</width>
-     <height>20</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <pointsize>8</pointsize>
-    </font>
-   </property>
-   <property name="inputMethodHints">
-    <set>Qt::ImhPreferUppercase|Qt::ImhUppercaseOnly</set>
-   </property>
-   <property name="text">
-    <string>0010057E</string>
-   </property>
-   <property name="maxLength">
-    <number>12</number>
+    <string>MAC Addr</string>
    </property>
   </widget>
   <widget class="QLabel" name="uiUpgradeResult">
@@ -2457,6 +2433,19 @@
    </property>
    <property name="text">
     <string>V:13 22Khz: OFF</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="macAddressInputValue">
+   <property name="geometry">
+    <rect>
+     <x>140</x>
+     <y>450</y>
+     <width>120</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
    </property>
   </widget>
  </widget>
