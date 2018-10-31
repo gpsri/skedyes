@@ -1181,8 +1181,8 @@
   <widget class="QLabel" name="handleAppSwUpdate">
    <property name="geometry">
     <rect>
-     <x>40</x>
-     <y>510</y>
+     <x>410</x>
+     <y>480</y>
      <width>90</width>
      <height>20</height>
     </rect>
@@ -1219,8 +1219,8 @@
   <widget class="QPushButton" name="uiUpdateStartButton">
    <property name="geometry">
     <rect>
-     <x>140</x>
-     <y>510</y>
+     <x>510</x>
+     <y>480</y>
      <width>60</width>
      <height>20</height>
     </rect>
@@ -1638,8 +1638,8 @@
   <widget class="QLabel" name="uiUpgradeResult">
    <property name="geometry">
     <rect>
-     <x>270</x>
-     <y>510</y>
+     <x>590</x>
+     <y>480</y>
      <width>48</width>
      <height>20</height>
     </rect>

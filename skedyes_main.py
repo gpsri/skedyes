@@ -1363,6 +1363,29 @@ def stbPerformHddTest(app,tel):
     #update the HDD serial number
     # do the format
     # do the read/write test
+
+    #Format Completed and do the HDD test
+    tel.telWrite(command_list[TestCommnad.HDD_TEST])
+    HddTestStartedFlag = 1
+    app.ptc_update_msg("updateHddTestProgress","HDD R/W Test Progress",str(currentProgressbarValue))
+    print "Test is Progress"
+    while HddTestStartedFlag: # keep read the socket untill get pass result
+            QtCore.QCoreApplication.processEvents()
+            data = tel.telReadSocket(app)
+            match1 = re.search(hddTestCompleteString,data)
+            match2 = re.search(hddTestFailString,data)
+            if match1 or match2:
+                print "HDD test Completed"
+                HddTestStartedFlag = 0
+                if match2:
+                    print "HDD Test Failed"
+                    app.ptc_update_msg("updateHddTestProgress","HDD Test Failed",str(currentProgressbarValue))
+                    return 0
+            else :
+                time.sleep(1)
+                continue
+
+
     tel.telWrite(command_list[TestCommnad.GET_HDD_SERIAL])
     time.sleep(1)
     data = tel.telReadSocket(app)
@@ -1401,26 +1424,7 @@ def stbPerformHddTest(app,tel):
                 app.ptc_update_msg("updateHddTestProgress","Format Progress",str(currentProgressbarValue))
                 time.sleep(1)
                 continue
-    #Format Completed and do the HDD test
-    tel.telWrite(command_list[TestCommnad.HDD_TEST])
-    HddTestStartedFlag = 1
-    app.ptc_update_msg("updateHddTestProgress","HDD R/W Test Progress",str(currentProgressbarValue))
-    print "Test is Progress"
-    while HddTestStartedFlag: # keep read the socket untill get pass result
-            QtCore.QCoreApplication.processEvents()
-            data = tel.telReadSocket(app)
-            match1 = re.search(hddTestCompleteString,data)
-            match2 = re.search(hddTestFailString,data)
-            if match1 or match2:
-                print "HDD test Completed"
-                HddTestStartedFlag = 0
-                if match2:
-                    print "HDD Test Failed"
-                    app.ptc_update_msg("updateHddTestProgress","HDD Test Failed",str(currentProgressbarValue))
-                    return 0
-            else :
-                time.sleep(1)
-                continue
+
     if not match2:
         global hddtestCnt
         currentProgressbarValue = 100
@@ -1946,7 +1950,7 @@ except AttributeError:
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
     myapp = SkedYesUI()
-    myapp.setWindowTitle(_translate("SkedYes", "SKED YES V1.09", None))
+    myapp.setWindowTitle(_translate("SkedYes", "SKED YES V1.10", None))
 
     timenow = '%s' % (time.ctime(time.time()))
     myapp.ui.dateAndTime.setText(timenow)
