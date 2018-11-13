@@ -18,8 +18,26 @@ hddmutex = Lock()
 
 
 exitFlag = 0
+resultFlag = "000000000000"
 hddtestCnt =0
 hddtestFlag = 0
+
+HDD_TEST = 0
+USB_TEST = 1
+SMC_TEST = 2
+FAN_TEST = 3
+LNB_TEST = 4
+TUNER_TEST = 5
+VFD_TEST = 6
+BUTTON_TEST = 7
+LED_TEST = 8
+IR_TEST = 9
+HDCP_PRG = 10
+UI_PRG = 11
+current_idx = 0
+
+mac_list = []
+index_mac_list = 0
 
 try:
     _encoding = QtGui.QApplication.UnicodeUTF8
@@ -98,6 +116,7 @@ class getPTCThread(QThread):
         self.emit(SIGNAL("uiUpdateProcess(QString,QString,QString)"),option,value, msg)
 
     def run(self):
+        global resultFlag
         while self.runThread:
             msg = self.msgQ.get()
             print " %s " % msg
@@ -107,9 +126,11 @@ class getPTCThread(QThread):
                 if(ret > 0):
                     print "Tuner Test Passed"
                     self.ptc_update_msg("updateTunerTestResult","PASS",'')
+                    resultFlag = resultFlag[:TUNER_TEST] + "1" + resultFlag[TUNER_TEST+1:]
                 else:
                     print "Tuner Test Failed"
                     self.ptc_update_msg("updateTunerTestResult","FAIL",'')
+                    resultFlag = resultFlag[:TUNER_TEST] + "0" + resultFlag[TUNER_TEST+1:]
                 ptcTestIdx.testProgressFlag = False
             elif (msg == "stopTunerTest"):
                 ptcTestIdx.testProgressFlag = True
@@ -121,9 +142,11 @@ class getPTCThread(QThread):
                 if(ret > 0):
                     print "HDD Test Passed"
                     self.ptc_update_msg("updateHddTestResult","PASS",'')
+                    resultFlag = resultFlag[:HDD_TEST] + "1" + resultFlag[HDD_TEST+1:]
                 else:
                     print "HDD Test Failed"
                     self.ptc_update_msg("updateHddTestResult","FAIL",'')
+                    resultFlag = resultFlag[:HDD_TEST] + "0" + resultFlag[HDD_TEST+1:]
                 ptcTestIdx.testProgressFlag = False
             elif (msg == "startUsbTest"):
                 ptcTestIdx.testProgressFlag = True
@@ -131,9 +154,11 @@ class getPTCThread(QThread):
                 if(ret > 0):
                     print "USB Test Passed"
                     self.ptc_update_msg("updateUsbTestResult","PASS",'')
+                    resultFlag = resultFlag[:USB_TEST] + "1" + resultFlag[USB_TEST+1:]
                 else:
                     print "USB Test Failed"
                     self.ptc_update_msg("updateUsbTestResult","FAIL",'')
+                    resultFlag = resultFlag[:USB_TEST] + "0" + resultFlag[USB_TEST+1:]
                 ptcTestIdx.testProgressFlag = False
             elif (msg == "stopUsbTest"):
                 ptcTestIdx.testProgressFlag = True
@@ -146,9 +171,11 @@ class getPTCThread(QThread):
                 if(ret > 0):
                     print "Smartcard Test Passed"
                     self.ptc_update_msg("updateSmartcardTestResult","PASS",'')
+                    resultFlag = resultFlag[:SMC_TEST] + "1" + resultFlag[SMC_TEST+1:]
                 else:
                     print "Smartcard Test Failed"
                     self.ptc_update_msg("updateSmartcardTestResult","FAIL",'')
+                    resultFlag = resultFlag[:SMC_TEST] + "0" + resultFlag[SMC_TEST+1:]
                 ptcTestIdx.testProgressFlag = False
             elif  (msg == "stopSmartcardTest"):
                 ptcTestIdx.testProgressFlag = True
@@ -161,9 +188,11 @@ class getPTCThread(QThread):
                 if(ret > 0):
                     print "Fan Test Passed"
                     self.ptc_update_msg("updateFanTestResult","PASS",'')
+                    resultFlag = resultFlag[:FAN_TEST] + "1" + resultFlag[FAN_TEST+1:]
                 else:
                     print "Fan Test Failed"
                     self.ptc_update_msg("updateFanTestResult","FAIL",'')
+                    resultFlag = resultFlag[:FAN_TEST] + "0" + resultFlag[FAN_TEST+1:]
                 ptcTestIdx.testProgressFlag = False
             elif  (msg == "stopFanTest"):
                 ptcTestIdx.testProgressFlag = True
@@ -176,9 +205,11 @@ class getPTCThread(QThread):
                 if(ret > 0):
                     print "Led Test Passed"
                     self.ptc_update_msg("updateLedTestResult","PASS",'')
+                    resultFlag = resultFlag[:LED_TEST] + "1" + resultFlag[LED_TEST+1:]
                 else:
                     print "Led Test Failed"
                     self.ptc_update_msg("updateLedTestResult","FAIL",'')
+                    resultFlag = resultFlag[:LED_TEST] + "0" + resultFlag[LED_TEST+1:]
                 ptcTestIdx.testProgressFlag = False
             elif  (msg == "stopLedTest"):
                 ptcTestIdx.testProgressFlag = True
@@ -191,9 +222,11 @@ class getPTCThread(QThread):
                 if(ret > 0):
                     print "Fp Test Passed"
                     self.ptc_update_msg("updateFpTestResult","PASS",'')
+                    resultFlag = resultFlag[:VFD_TEST] + "1" + resultFlag[VFD_TEST+1:]
                 else:
                     print "Fp Test Failed"
                     self.ptc_update_msg("updateFpTestResult","FAIL",'')
+                    resultFlag = resultFlag[:VFD_TEST] + "0" + resultFlag[VFD_TEST+1:]
                 ptcTestIdx.testProgressFlag = False
             elif  (msg == "stopFpTest"):
                 ptcTestIdx.testProgressFlag = True
@@ -206,9 +239,11 @@ class getPTCThread(QThread):
                 if(ret > 0):
                     print "Button Test Passed"
                     self.ptc_update_msg("updateButtonTestResult","PASS",'')
+                    resultFlag = resultFlag[:BUTTON_TEST] + "1" + resultFlag[BUTTON_TEST+1:]
                 else:
                     print "Button Test Failed"
                     self.ptc_update_msg("updateButtonTestResult","FAIL",'')
+                    resultFlag = resultFlag[:BUTTON_TEST] + "0" + resultFlag[BUTTON_TEST+1:]
                 ptcTestIdx.testProgressFlag = False
             elif  (msg == "stopButtonTest"):
                 ptcTestIdx.testProgressFlag = True
@@ -221,9 +256,11 @@ class getPTCThread(QThread):
                 if(ret > 0):
                     print "IR Test Passed"
                     self.ptc_update_msg("updateIrTestResult","PASS",'')
+                    resultFlag = resultFlag[:IR_TEST] + "1" + resultFlag[IR_TEST+1:]
                 else:
                     print "IR Test Failed"
                     self.ptc_update_msg("updateIrTestResult","FAIL",'')
+                    resultFlag = resultFlag[:IR_TEST] + "0" + resultFlag[IR_TEST+1:]
                 ptcTestIdx.testProgressFlag = False
             elif  (msg == "stopIrTest"):
                 ptcTestIdx.testProgressFlag = True
@@ -236,9 +273,11 @@ class getPTCThread(QThread):
                 if(ret > 0):
                     print "HDCP Key Program Passed"
                     self.ptc_update_msg("updateHdcpKeyResult","PASS",'')
+                    resultFlag = resultFlag[:HDCP_PRG] + "1" + resultFlag[HDCP_PRG+1:]
                 else:
                     print "HDCP Key Program Failed"
                     self.ptc_update_msg("updateHdcpKeyResult","FAIL",'')
+                    resultFlag = resultFlag[:HDCP_PRG] + "0" + resultFlag[HDCP_PRG+1:]
                 ptcTestIdx.testProgressFlag = False
             elif  (msg == "startUiUpgrade"):
                 ptcTestIdx.testProgressFlag = True
@@ -247,9 +286,11 @@ class getPTCThread(QThread):
                 if(ret > 0):
                     print "UI Upgrade passed"
                     self.ptc_update_msg("updateUiUpgradeResult","PASS",'')
+                    resultFlag = resultFlag[:UI_PRG] + "1" + resultFlag[UI_PRG+1:]
                 else:
                     print "IR Test Failed"
                     self.ptc_update_msg("updateUiUpgradeResult","FAIL",'')
+                    resultFlag = resultFlag[:UI_PRG] + "0" + resultFlag[UI_PRG+1:]
                 ptcTestIdx.testProgressFlag = False
             elif  (msg == "startLnbTest"):
                 ptcTestIdx.testProgressFlag = True
@@ -258,13 +299,20 @@ class getPTCThread(QThread):
                 if(ret > 0):
                     print "LNB Test passed"
                     self.ptc_update_msg("updateLnbTestResult","PASS",'')
+                    resultFlag = resultFlag[:LNB_TEST] + "1" + resultFlag[LNB_TEST+1:]
                 else:
                     print "LNB Test Failed"
                     self.ptc_update_msg("updateLnbTestResult","FAIL",'')
+                    resultFlag = resultFlag[:LNB_TEST] + "0" + resultFlag[LNB_TEST+1:]
                 ptcTestIdx.testProgressFlag = False
             #print " %s" % ( time.ctime(time.time()))
             #timenow = '%s' % (time.ctime(time.time()))
             #self.ptc_update_msg("updateClock",timenow,"")
+            if (resultFlag[:IR_TEST+1] == "1111111111"):
+                self.ptc_update_msg("disconnectfromDut","PASS",'')
+            elif (resultFlag[HDCP_PRG] == "1" or resultFlag[UI_PRG] == "1"):
+                self.ptc_update_msg("disconnectfromDut","PASS",'')
+            print(resultFlag)
             self.sleep(1)
             self.msgQ.task_done()
 
@@ -352,7 +400,7 @@ class SkedYesUI(QtGui.QMainWindow):
         self.ui.disconnectButton.setEnabled(False)
         self.tunerTestOptionUpdate()
         self.updateConnectionStatus("Not Connected ")
-        self.resetValues()
+        self.resetButton()
 
 
     def setFocus(self):
@@ -408,6 +456,35 @@ class SkedYesUI(QtGui.QMainWindow):
         if(ptcTestIdx.current_idx == ptcTestIdx.UI_PRG ):
             self.ui.handleAppSwUpdate.setStyleSheet("none");
 
+    def resetButton(self):
+        self.ui.disconnectButton.clicked.disconnect()
+        self.ui.tunerStartButton.clicked.disconnect()
+        self.ui.tunerStopButton.clicked.disconnect()
+
+        self.ui.lnbStartButton.clicked.disconnect()
+        self.ui.lnbStopButton.clicked.disconnect()
+
+        self.ui.hddStartButton.clicked.disconnect()
+        self.ui.hddStopButton.clicked.disconnect()
+        self.ui.usbStartButton.clicked.disconnect()
+        self.ui.usbStopButton.clicked.disconnect()
+        self.ui.smartcardStartButton.clicked.disconnect()
+        self.ui.smartcardStopButton.clicked.disconnect()
+        self.ui.fanStartButton.clicked.disconnect()
+        self.ui.fanStopButton.clicked.disconnect()
+        self.ui.ledStartButton.clicked.disconnect()
+        self.ui.ledStopButton.clicked.disconnect()
+        self.ui.fpStartButton.clicked.disconnect()
+        self.ui.fpStopButton.clicked.disconnect()
+        self.ui.buttonStartButton.clicked.disconnect()
+        self.ui.buttonStopButton.clicked.disconnect()
+        self.ui.irStartButton.clicked.disconnect()
+        self.ui.irStopButton.clicked.disconnect()
+        self.ui.hdcpStartButton.clicked.disconnect()
+        self.ui.uiUpdateStartButton.clicked.disconnect()
+        self.ui.autoTestButton.setChecked(False)
+
+
     def resetValues(self):
 
         self.clearFocus()
@@ -452,41 +529,19 @@ class SkedYesUI(QtGui.QMainWindow):
         self.ui.textStbHddSn.clear()
         self.ui.statusMsgLabel.clear()
 
-        self.ui.disconnectButton.clicked.disconnect()
-        self.ui.tunerStartButton.clicked.disconnect()
-        self.ui.tunerStopButton.clicked.disconnect()
-
-        self.ui.lnbStartButton.clicked.disconnect()
-        self.ui.lnbStopButton.clicked.disconnect()
-
-        self.ui.hddStartButton.clicked.disconnect()
-        self.ui.hddStopButton.clicked.disconnect()
-        self.ui.usbStartButton.clicked.disconnect()
-        self.ui.usbStopButton.clicked.disconnect()
-        self.ui.smartcardStartButton.clicked.disconnect()
-        self.ui.smartcardStopButton.clicked.disconnect()
-        self.ui.fanStartButton.clicked.disconnect()
-        self.ui.fanStopButton.clicked.disconnect()
-        self.ui.ledStartButton.clicked.disconnect()
-        self.ui.ledStopButton.clicked.disconnect()
-        self.ui.fpStartButton.clicked.disconnect()
-        self.ui.fpStopButton.clicked.disconnect()
-        self.ui.buttonStartButton.clicked.disconnect()
-        self.ui.buttonStopButton.clicked.disconnect()
-        self.ui.irStartButton.clicked.disconnect()
-        self.ui.irStopButton.clicked.disconnect()
-        self.ui.hdcpStartButton.clicked.disconnect()
-        self.ui.uiUpdateStartButton.clicked.disconnect()
-
         self.ui.fanSpeed.clear()
-        self.ui.lnbValue.clear()
-        self.ui.tunerLnbValue.clear()
+        #self.ui.lnbValue.clear()
+        #self.ui.tunerLnbValue.clear()
         self.ui.buttonKeysRecivce.clear()
         self.ui.irKeysRecivce.clear()
         self.ui.hdcpStartButton.setEnabled(True)
         self.ui.macAddressInputValue.clear()
 
+        global resultFlag
+        resultFlag = "000000000000"
+
     def connectTheSTB(self):
+        self.resetValues()
         print "Connecting to telnet ... "
         self.telnetcli = SkedTelnet()
         print "Connected "
@@ -530,8 +585,107 @@ class SkedYesUI(QtGui.QMainWindow):
         self.ui.hdcpStartButton.clicked.connect(self.startHdcpKeyProgram)
         self.ui.uiUpdateStartButton.clicked.connect(self.startUiUpgrade)
         self.ui.statusMsgLabel.setStyleSheet("QLabel { background-color : black; color : white; }")
+
+        if os.path.isfile("mac/mac.cfg") == False:
+            self.ui.hdcpStartButton.setEnabled(False)
+        else :
+            if os.path.isfile("mac/mac.lst") == False:
+                if (self.generateMacList() == False or self.readMACAddress() == False):
+                    self.ui.hdcpStartButton.setEnabled(False)
+                else:
+                    self.ui.hdcpStartButton.setEnabled(True)
+            else :
+                if (self.readMACAddress() == False):
+                    self.ui.hdcpStartButton.setEnabled(False)
+                else:
+                    self.ui.hdcpStartButton.setEnabled(True)
         if(self.ui.autoTestButton.isChecked()):
             self.startHddTest()
+
+    def generateMacList(self):
+
+        list_cfg = []
+        start_str = ""
+        end_str = ""
+        fp = open("mac/mac.cfg", "r")
+        line = fp.readline()
+        while line:
+            list_cfg.append(line)
+            line = fp.readline()
+        fp.close()
+        len_cfg_arg = len(list_cfg)
+
+        idx = 0
+        foundStart = False
+        foundEnd = False
+        while idx < len_cfg_arg:
+            if list_cfg[idx].find("start_mac=") != -1:
+                start_str = list_cfg[idx][list_cfg[idx].find("start_mac=0x")+len("start_mac=0x"):]
+                print "Start Mac:", start_str
+                foundStart = True
+
+            if list_cfg[idx].find("end_mac=") != -1:
+                end_str = list_cfg[idx][list_cfg[idx].find("end_mac=0x")+len("end_mac=0x"):]
+                print "End Mac:", end_str
+                foundEnd = True
+            idx = idx + 1
+
+        if (foundStart == False or foundEnd == False):
+            return 0
+        start_hex = string.atoi(start_str, 16)
+        end_hex = string.atoi(end_str, 16)
+        lenofmaclist = end_hex - start_hex + 1
+        if lenofmaclist % 2 != 0 :
+            lenofmaclist = lenofmaclist - 1
+        print "start(hex):", start_hex, "end(hex):", end_hex, "length of list : ", lenofmaclist
+        fp = open("mac/mac.lst", "w")
+        idx = 0
+        fixbit = 0
+        while idx < lenofmaclist:
+            mac = "{0:x}".format(start_hex)
+            fixbit = len(mac)
+            while fixbit < 12:
+                mac = "0" + mac
+                fixbit = fixbit + 1
+
+            fp.write(mac + " --0\n")
+            start_hex = start_hex + 2
+            idx = idx + 2
+        fp.close()
+        return 1
+
+    def readMACAddress(self):
+        global index_mac_list, mac_list
+        index_mac_list = 0
+        mac_list = []
+        fp = open("mac/mac.lst", "r")
+        line = fp.readline()
+        while line:
+            mac_list.append(line)
+            line = fp.readline()
+
+        file_line = len(mac_list)
+        idx = 0
+        mac = ""
+        flag_find_mac = False
+        print "Line of record:", file_line
+        while file_line > idx:
+            if mac_list[idx].count("--0") == 1 :
+                mac = mac_list[idx][0:12]
+                mac_list[idx] = mac_list[idx].replace("--0", "--tmp", 1)
+                index_mac_list = idx
+                print "-->", mac_list[idx], "--->", mac
+                flag_find_mac = True
+                break
+            idx = idx + 1
+        fp.close()
+        if flag_find_mac == False:
+            self.ui.macAddressInputValue.setText(_translate("SkedYes", "no mac address", None))
+            return 0
+
+        self.ui.macAddressInputValue.setText(_translate("SkedYes", mac.upper(), None))
+        return 1
+
 
     def tunerTestOptionUpdate(self):
         self.ui.tunerStartButton.setEnabled(True)
@@ -770,6 +924,9 @@ class SkedYesUI(QtGui.QMainWindow):
             self.updateHdcpKeyResult(value)
         elif (option == "updateUiUpgradeResult"):
             self.updateUiUpgradeResult(value)
+        elif (option == "disconnectfromDut"):
+            self.disconectTheSTB()
+
 
     def buttonSetFocus(self,buttonObject):
         #buttonObject.setGeometry(QtCore.QRect(440, 270, 80, 40))
@@ -1576,60 +1733,6 @@ def stbStopIrTest(app,tel):
     tel.telWrite(command_list[TestCommnad.STOP_TUNE_TEST]) # ctrl +c to stop
     time.sleep(2)
 
-mac_list = []
-index_mac_list = 0
-
-def generateMacList():
-
-    list_cfg = []
-    start_str = ""
-    end_str = ""
-    fp = open("mac/mac.cfg", "r")
-    line = fp.readline()
-    while line:
-        list_cfg.append(line)
-        line = fp.readline()
-    fp.close()
-    len_cfg_arg = len(list_cfg)
-
-    idx = 0
-    foundStart = False
-    foundEnd = False
-    while idx < len_cfg_arg:
-        if list_cfg[idx].find("start_mac=") != -1:
-            start_str = list_cfg[idx][list_cfg[idx].find("start_mac=0x")+len("start_mac=0x"):]
-            print "Start Mac:", start_str
-            foundStart = True
-
-        if list_cfg[idx].find("end_mac=") != -1:
-            end_str = list_cfg[idx][list_cfg[idx].find("end_mac=0x")+len("end_mac=0x"):]
-            print "End Mac:", end_str
-            foundEnd = True
-        idx = idx + 1
-    if (foundStart == False or foundEnd == False):
-        return 0
-    start_hex = string.atoi(start_str, 16)
-    end_hex = string.atoi(end_str, 16)
-    lenofmaclist = end_hex - start_hex + 1
-    if lenofmaclist % 2 != 0 :
-        lenofmaclist = lenofmaclist - 1
-    print "start(hex):", start_hex, "end(hex):", end_hex, "length of list : ", lenofmaclist
-    fp = open("mac/mac.lst", "w")
-    idx = 0
-    fixbit = 0
-    while idx < lenofmaclist:
-        mac = "{0:x}".format(start_hex)
-        fixbit = len(mac)
-        while fixbit < 12:
-            mac = "0" + mac
-            fixbit = fixbit + 1
-
-        fp.write(mac + " --0\n")
-        start_hex = start_hex + 2
-        idx = idx + 2
-    fp.close()
-
-
 def revertMACAddress():
     fp = open("mac/mac.lst", "w+")
     file_line = len(mac_list)
@@ -1660,38 +1763,6 @@ def rmMACAddress():
 
     fp.close()
 
-def readMACAddress():
-    global index_mac_list, mac_list
-    index_mac_list = 0
-    mac_list = []
-    fp = open("mac/mac.lst", "r")
-    line = fp.readline()
-    while line:
-        mac_list.append(line)
-        line = fp.readline()
-
-    file_line = len(mac_list)
-    idx = 0
-    mac = ""
-    flag_find_mac = False
-    print "Line of record:", file_line
-    while file_line > idx:
-        if mac_list[idx].count("--0") == 1 :
-            mac = mac_list[idx][0:12]
-            mac_list[idx] = mac_list[idx].replace("--0", "--tmp", 1)
-            index_mac_list = idx
-            print "-->", mac_list[idx], "--->", mac
-            flag_find_mac = True
-            break
-        idx = idx + 1
-    fp.close()
-    if flag_find_mac == False:
-        myapp.ui.macAddressInputValue.setText(_translate("SkedYes", "no mac address", None))
-        return 0
-
-    myapp.ui.macAddressInputValue.setText(_translate("SkedYes", mac.upper(), None))
-    return 1
-
 def stbPerformHdcpKeyProgramming(app,tel):
     hdcpKeyResponseMatchString1 = "Get key from key server"
     hdcpKeyResponseMatchString2 = "Key Server IP"
@@ -1701,20 +1772,17 @@ def stbPerformHdcpKeyProgramming(app,tel):
     hdcpKeyResponseMatchString6 = "HDCP1.4 key isn't exist"
     hdcpKeyResponseMatchString7 = "HDCP2.2 key isn't exist"
 
-    if os.path.isfile("mac/mac.cfg") == False:
-        app.ptc_update_msg("updateHdcpKeyResult","FAIL","")
-        return 0
-    else :
-        if os.path.isfile("mac/mac.lst") == False:
-            if (generateMacList() == False):
-                return 0
-    if readMACAddress() == False:
-        return 0
-
     print "start hdcp key programming"
     macadd = myapp.ui.macAddressInputValue.text()
-    print macadd
-       # Write MAC Address
+    mac = str(macadd)
+    mac = mac.upper()
+    filename = "mac/" + mac + ".txt"
+    if os.path.isfile(filename) == True:
+        print("REPATE MAC!!!!!!!!!!!!!!!!!!")
+        print(mac)
+        print("REPATE MAC!!!!!!!!!!!!!!!!!!")
+        return 0
+    # Write MAC Address
     statusStr = "Write MAC successfully"
     tel.telWrite('\x03') #ctrl + c
     time.sleep(1)
@@ -1766,7 +1834,7 @@ def stbPerformHdcpKeyProgramming(app,tel):
                     match1 = re.search(hdcpKeyResponseMatchString5,data)
                     if  match1:
                         app.ptc_update_msg("updateHdcpKeyResult","FAIL","")
-                        myapp.ui.revertMACAddress(myapp.ui)
+                        revertMACAddress()
                         return 0
                     elif match:
                         #verify the Keys 1.x
@@ -1790,7 +1858,13 @@ def stbPerformHdcpKeyProgramming(app,tel):
                             revertMACAddress()
                             return 0
 
+                        mac = str( myapp.ui.macAddressInputValue.text())
+                        mac = mac.upper()
+                        filename = "mac/" + mac.upper() + ".txt"
                         app.ptc_update_msg("updateHdcpKeyResult","PASS","")
+                        record = open(filename, "w")
+                        record .write(mac.upper())
+                        record .close()
                         rmMACAddress()
                         return 1
 
@@ -1950,7 +2024,7 @@ except AttributeError:
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
     myapp = SkedYesUI()
-    myapp.setWindowTitle(_translate("SkedYes", "SKED YES V1.10", None))
+    myapp.setWindowTitle(_translate("SkedYes", "SKED YES V1.11", None))
 
     timenow = '%s' % (time.ctime(time.time()))
     myapp.ui.dateAndTime.setText(timenow)
