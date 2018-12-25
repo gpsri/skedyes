@@ -2448,6 +2448,19 @@
     <string/>
    </property>
   </widget>
+  <widget class="QLabel" name="connectResult_label">
+   <property name="geometry">
+    <rect>
+     <x>570</x>
+     <y>20</y>
+     <width>31</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+  </widget>
  </widget>
  <resources/>
  <connections>

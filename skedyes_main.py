@@ -2,7 +2,7 @@ import sys
 from PyQt4 import QtCore, QtGui
 from PyQt4.QtCore import QThread, SIGNAL
 from skqtui import Ui_SkedYes
-from stbcom import TestCommnad, SkedTelnet, buildCommandList, command_list
+from stbcom import TestCommnad, SkedTelnet, buildCommandList, command_list, test_pingHOST
 # telnet program example
 import socket, select, string, threading, time
 from threading import Thread, Lock
@@ -222,7 +222,7 @@ class getPTCThread(QThread):
                 if(ret > 0):
                     print "Fp Test Passed"
                     self.ptc_update_msg("updateFpTestResult","PASS",'')
-                    resultFlag = resultFlag[:VFD_TEST] + "1" + resultFlag[VFD_TEST+1:]
+                    resultFlag = resultFlag[:VFD_TEST] + "1 " + resultFlag[VFD_TEST+1:]
                 else:
                     print "Fp Test Failed"
                     self.ptc_update_msg("updateFpTestResult","FAIL",'')
@@ -522,6 +522,8 @@ class SkedYesUI(QtGui.QMainWindow):
         self.ui.hdcpKeyResult.setStyleSheet("QLabel { background-color : silver; color : gray; }");
         self.ui.uiUpgradeResult.setStyleSheet("QLabel { background-color : silver; color : gray; }");
         self.ui.lnbResult.setStyleSheet("QLabel { background-color : silver; color : gray; }");
+        self.ui.connectResult_label.setStyleSheet("QLabel { background-color : silver; color : gray; }");
+        self.ui.connectResult_label.clear()
         self.ui.textStbSwVersion.clear()
         self.ui.textStbEth0Mac.clear()
         self.ui.textStbWifiMac.clear()
@@ -542,6 +544,11 @@ class SkedYesUI(QtGui.QMainWindow):
 
     def connectTheSTB(self):
         self.resetValues()
+        print ("Check the net enviorment")
+        if(test_pingHOST() == 0) :
+            self.ui.connectResult_label.setStyleSheet(_fromUtf8("QLabel { background-color : red; color : white; }"))
+            self.ui.connectResult_label.setText("FAIL")
+            return
         print "Connecting to telnet ... "
         self.telnetcli = SkedTelnet()
         print "Connected "
@@ -2024,7 +2031,7 @@ except AttributeError:
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
     myapp = SkedYesUI()
-    myapp.setWindowTitle(_translate("SkedYes", "SKED YES V1.11", None))
+    myapp.setWindowTitle(_translate("SkedYes", "SKED YES V1.12", None))
 
     timenow = '%s' % (time.ctime(time.time()))
     myapp.ui.dateAndTime.setText(timenow)

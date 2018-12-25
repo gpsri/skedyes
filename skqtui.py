@@ -865,6 +865,10 @@ class Ui_SkedYes(object):
         self.macAddressInputValue.setGeometry(QtCore.QRect(140, 450, 120, 20))
         self.macAddressInputValue.setText(_fromUtf8(""))
         self.macAddressInputValue.setObjectName(_fromUtf8("macAddressInputValue"))
+        self.connectResult_label = QtGui.QLabel(SkedYes)
+        self.connectResult_label.setGeometry(QtCore.QRect(570, 20, 31, 20))
+        self.connectResult_label.setText(_fromUtf8(""))
+        self.connectResult_label.setObjectName(_fromUtf8("connectResult_label"))
 
         self.retranslateUi(SkedYes)
         QtCore.QObject.connect(self.exitButton, QtCore.SIGNAL(_fromUtf8("clicked()")), SkedYes.close)
