@@ -79,7 +79,7 @@ def buildCommandList():
     command_list.append("sata -d -t") # HDD_TEST = 4
     command_list.append("hddSerialNumber") # GET_HDD_SERIAL = 5
     command_list.append("cd /root/htp/" ) # HDD_FORMAT_CMD1 = 6
-    command_list.append("/root/htp/xtv_format_utility /dev/sda p 1 EXT2 200") # HDD_FORMAT_CMD2 = 7
+    command_list.append("/root/htp/xtv_format_utility /dev/sda p 1 EXT2 200 &") # HDD_FORMAT_CMD2 = 7
     command_list.append("diseqc 13 1") # LNB_LOW_22K_ON = 8
     command_list.append("diseqc 13 0") # LNB_LOW_22K_OFF = 9
     command_list.append("diseqc 18 1") # LNB_HIGH_22K_ON = 10
@@ -150,10 +150,16 @@ class SkedTelnet():
     def telReadSocket(self,app):
         try:
             s= self.tn.get_socket()
+            defaultTimeout = s.gettimeout()
             while 1:
                 QtCore.QCoreApplication.processEvents()
                 time.sleep(.5)
-                data = s.recv(4096)
+                s.settimeout(1)
+                try:
+                    data = s.recv(4096)
+                except:
+                    print "socket read timeout"
+                    return ''
                 if not data :
                     print 'No data from Telnet Server'
                 else :

@@ -136,6 +136,10 @@ class getPTCThread(QThread):
                 ptcTestIdx.testProgressFlag = True
                 stbStopTunerTest(self,self.telnetcli)
                 ptcTestIdx.testProgressFlag = False
+            elif (msg == "startAutoTest"):
+                ptcTestIdx.testProgressFlag = True
+                stbStartAutoTest(self, self.telnetcli)
+                ptcTestIdx.testProgressFlag = False
             elif(msg == "startHddTest"):
                 ptcTestIdx.testProgressFlag = True
                 ret = stbPerformHddTest(self,self.telnetcli)
@@ -607,7 +611,8 @@ class SkedYesUI(QtGui.QMainWindow):
                 else:
                     self.ui.hdcpStartButton.setEnabled(True)
         if(self.ui.autoTestButton.isChecked()):
-            self.startHddTest()
+            #self.startHddTest()
+            self.startAutoTest()
 
     def generateMacList(self):
 
@@ -757,6 +762,8 @@ class SkedYesUI(QtGui.QMainWindow):
         self.ui.irStopButton.setEnabled(False)
         self.msgQ.put("stopIrTest")
 
+    def startAutoTest(self):
+        self.msgQ.put("startAutoTest")
 
     def startHddTest(self):
         self.tunerTestOptionUpdate()
@@ -1050,9 +1057,9 @@ class SkedYesUI(QtGui.QMainWindow):
             self.ui.hddResult.setText("FAIL")
         self.ui.hddStartButton.setEnabled(True)
         self.ui.hddStopButton.setEnabled(False)
-        if(self.ui.autoTestButton.isChecked()):
-            self.startUsbTest()
-        #    self.startHddTest()
+        #if(self.ui.autoTestButton.isChecked()):
+            #self.startUsbTest()
+            # self.startHddTest()
 
     def updateHddTestProgress(self,text, value):
         self.ui.hddTestProgressBar.setProperty("value",value)
@@ -1075,8 +1082,8 @@ class SkedYesUI(QtGui.QMainWindow):
             self.ui.usbResult.setText("FAIL")
         self.ui.usbStartButton.setEnabled(True)
         self.ui.usbStopButton.setEnabled(False)
-        if(self.ui.autoTestButton.isChecked()):
-            self.startSmartcardTest()
+        #if(self.ui.autoTestButton.isChecked()):
+            #self.startSmartcardTest()
 
     def updateHdcpKeyResult(self,text):
         if(text == "PASS"):
@@ -1115,8 +1122,8 @@ class SkedYesUI(QtGui.QMainWindow):
 
         self.ui.smartcardStartButton.setEnabled(True)
         self.ui.smartcardStopButton.setEnabled(False)
-        if(self.ui.autoTestButton.isChecked()):
-            self.startFanTest()
+        #if(self.ui.autoTestButton.isChecked()):
+            #self.startFanTest()
 
 
     def updateIrTestProgress(self,text, value):
@@ -1149,8 +1156,8 @@ class SkedYesUI(QtGui.QMainWindow):
             self.ui.fanResult.setText("FAIL")
         self.ui.fanStartButton.setEnabled(True)
         self.ui.fanStopButton.setEnabled(False)
-        if(self.ui.autoTestButton.isChecked()):
-            self.startLnbTest()
+        #if(self.ui.autoTestButton.isChecked()):
+            #self.startLnbTest()
 
     def updateFanTestSpeed(self,text):
             self.ui.fanSpeed.setText(text)
@@ -1516,6 +1523,237 @@ def stbStopUsbTest(app,tel):
     tel.telWrite('\x03') #ctrl + c
 
 # ['\r', '\n', '#', ' ', 'h', 'd', 'd', 'S', 'e', 'r', 'i', 'a', 'l', 'N', 'u', 'm', 'b', 'e', 'r', '\r', '\n', 'Z', '9', 'C', '5', 'P', 'J', '9', '3', '\r', '\n', '#', ' ']
+
+def stbStartAutoTest(app, tel):
+    global resultFlag
+    #Send Ctrl C to stop previous running tests
+    tel.telWrite('\x03') #ctrl + c
+    currentProgressbarValue = 20
+    formatstartString = "Format Started"
+    formatCompleteString = "Format Completed"
+    hddTestCompleteString = "aft"
+    hddTestFailString = "Sata'test is failed"
+    hddformatepass = 0
+    #update the HDD serial number
+    # do the format
+    # do the read/write test
+
+    #Format Completed and do the HDD test
+    tel.telWrite(command_list[TestCommnad.HDD_TEST])
+    HddTestStartedFlag = 1
+    match_hddfail = 0
+    app.ptc_update_msg("updateHddTestProgress","HDD R/W Test Progress",str(currentProgressbarValue))
+    print "Test is Progress"
+    while HddTestStartedFlag and not match_hddfail: # keep read the socket untill get pass result
+            QtCore.QCoreApplication.processEvents()
+            data = tel.telReadSocket(app)
+            match1 = re.search(hddTestCompleteString,data)
+            match_hddfail = re.search(hddTestFailString,data)
+            if match1 or match_hddfail:
+                print "HDD test Completed"
+                HddTestStartedFlag = 0
+                if match_hddfail:
+                    print "HDD Test Failed"
+                    app.ptc_update_msg("updateHddTestProgress","HDD Test Failed",str(currentProgressbarValue))
+
+            else :
+                time.sleep(1)
+                continue
+
+    tel.telWrite(command_list[TestCommnad.GET_HDD_SERIAL])
+    time.sleep(1)
+    data = tel.telReadSocket(app)
+    print list(data)
+    hddserial = (data[21:29])
+    print hddserial
+    app.ptc_update_msg("updateHddSerial",hddserial,"")
+    app.ptc_update_msg("updateHddTestProgress","Test Initiated",str(currentProgressbarValue))
+
+    tel.telWrite(command_list[TestCommnad.HDD_FORMAT_CMD1])
+    data = tel.telReadSocket(app)
+    tel.telWrite(command_list[TestCommnad.HDD_FORMAT_CMD2])
+    data = tel.telReadSocket(app)
+    currentProgressbarValue = currentProgressbarValue + 10
+    app.ptc_update_msg("updateHddTestProgress","Format begins",str(currentProgressbarValue))
+
+    # need 10~15 sec, do something else
+
+    #usb test
+    currentProgressbarValue = 20
+    #Send Ctrl C to stop previous running tests
+    tel.telWrite('\x03') #ctrl + c
+    usbPassString = "Test all PASS"
+    usbPassString1 = "USB type: usb3.0"
+    usbFailString = "Test all Failed"
+    usbNotInsertString = "Cannot find USB storage Device"
+    app.ptc_update_msg("updateUsbTestProgress","Test Initiated",str(currentProgressbarValue))
+    tel.telWrite(command_list[TestCommnad.USB_TEST])
+    time.sleep(2)
+    data = tel.telReadSocket(app)
+
+    if not hddformatepass:
+        hddformatepass = re.search(formatCompleteString, data)
+    #print list(data)
+    match = re.search(usbNotInsertString,data)
+    if match:
+        currentProgressbarValue = 100
+        app.ptc_update_msg("updateUsbTestProgress","Cannot find USB storage Device",str(currentProgressbarValue))
+        app.ptc_update_msg("updateUsbTestResult","FAIL",'')
+        resultFlag = resultFlag[:USB_TEST] + "0" + resultFlag[USB_TEST+1:]
+    else:
+        match1 = re.search(usbPassString,data)
+        match2 =  re.search(usbPassString1,data)
+        if match1 or match2:
+            currentProgressbarValue = 100
+            app.ptc_update_msg("updateUsbTestProgress","USB Test Passed ",str(currentProgressbarValue))
+            app.ptc_update_msg("updateUsbTestResult","PASS",'')
+            resultFlag = resultFlag[:USB_TEST] + "1" + resultFlag[USB_TEST+1:]
+        else:
+            match3 = re.search(usbFailString,data)
+            if match3:
+                currentProgressbarValue = 100
+                app.ptc_update_msg("updateUsbTestProgress","USB Test Failed ",str(currentProgressbarValue))
+                app.ptc_update_msg("updateUsbTestResult","FAIL",'')
+            resultFlag = resultFlag[:USB_TEST] + "0" + resultFlag[USB_TEST+1:]
+
+    # Smart Card tests
+    currentProgressbarValue = 20
+
+    #Send Ctrl C to stop previous running tests
+    tel.telWrite('\x03') #ctrl + c
+    smcPassString = "ATR Bytes received"
+    smcFailString = "Test all Failed"
+    smcNotInsertString = "Smartcard isn't inserted"
+    app.ptc_update_msg("updateSmartcardTestProgress","Test Initiated",str(currentProgressbarValue))
+    tel.telWrite(command_list[TestCommnad.SMC_TEST])
+    time.sleep(2)
+    data = tel.telReadSocket(app)
+    if not hddformatepass :
+        hddformatepass = re.search(formatCompleteString, data)
+    #print list(data)
+    match = re.search(smcNotInsertString,data)
+    if match:
+        currentProgressbarValue = 100
+        app.ptc_update_msg("updateSmartcardTestProgress","Smartcard isn't inserted",str(currentProgressbarValue))
+        app.ptc_update_msg("updateSmartcardTestResult","FAIL",'')
+        resultFlag = resultFlag[:SMC_TEST] + "0" + resultFlag[SMC_TEST+1:]
+    else:
+        match1 = re.search(smcPassString,data)
+        if match1:
+            currentProgressbarValue = 100
+            app.ptc_update_msg("updateSmartcardTestProgress","Smartcard Test Passed ",str(currentProgressbarValue))
+            app.ptc_update_msg("updateSmartcardTestResult","PASS",'')
+            resultFlag = resultFlag[:SMC_TEST] + "1" + resultFlag[SMC_TEST+1:]
+        else:
+            match2 = re.search(smcFailString,data)
+            if match2:
+                currentProgressbarValue = 100
+                app.ptc_update_msg("updateSmartcardTestProgress","Smartcard Test Failed ",str(currentProgressbarValue))
+                app.ptc_update_msg("updateSmartcardTestResult","FAIL",'')
+                resultFlag = resultFlag[:SMC_TEST] + "0" + resultFlag[SMC_TEST+1:]
+
+    # Fan Test
+    currentProgressbarValue = 20
+    fanPassString = "speed:"
+
+    #Send Ctrl C to stop previous running tests
+    tel.telWrite('\x03') #ctrl + c
+
+    app.ptc_update_msg("updateFanTestProgress","Test Initiated",str(currentProgressbarValue))
+    tel.telWrite(command_list[TestCommnad.FAN_TEST_CMD1])
+    time.sleep(1)
+    currentProgressbarValue = currentProgressbarValue + 10
+    app.ptc_update_msg("updateFanTestProgress","Test Progress",str(currentProgressbarValue))
+    tel.telWrite(command_list[TestCommnad.FAN_TEST_CMD2])
+    time.sleep(1)
+    currentProgressbarValue = currentProgressbarValue + 10
+    app.ptc_update_msg("updateFanTestProgress","Test Progress",str(currentProgressbarValue))
+    tel.telWrite(command_list[TestCommnad.FAN_TEST_CMD3])
+    time.sleep(1)
+    currentProgressbarValue = currentProgressbarValue + 10
+    app.ptc_update_msg("updateFanTestProgress","Test Progress",str(currentProgressbarValue))
+    tel.telWrite(command_list[TestCommnad.FAN_TEST_CMD4])
+    time.sleep(1)
+    currentProgressbarValue = currentProgressbarValue + 10
+    app.ptc_update_msg("updateFanTestProgress","Test Progress",str(currentProgressbarValue))
+    tel.telWrite(command_list[TestCommnad.FAN_TEST_CMD5])
+    time.sleep(2)
+    data = tel.telReadSocket(app)
+    if not hddformatepass :
+        hddformatepass = re.search(formatCompleteString, data)
+    #print list(data)
+    match = re.search(fanPassString,data)
+    if match:
+        currentProgressbarValue = 80
+
+        speed = data[(data.find(fanPassString)): (data.find(fanPassString)) + 15]
+        print speed
+        msgStr = "FAN : " + "%s"  % speed
+        print msgStr
+        app.ptc_update_msg("updateFanTestSpeed", msgStr, "")
+        app.ptc_update_msg("updateFanTestProgress",msgStr,str(currentProgressbarValue))
+        stbStopFanTest(app,tel)
+        currentProgressbarValue = 100
+        app.ptc_update_msg("updateFanTestProgress",msgStr,str(currentProgressbarValue))
+        app.ptc_update_msg("updateFanTestResult","PASS",'')
+        resultFlag = resultFlag[:FAN_TEST] + "1" + resultFlag[FAN_TEST+1:]
+    else:
+        currentProgressbarValue = 80
+        app.ptc_update_msg("updateFanTestProgress","Fan Test Failed ",str(currentProgressbarValue))
+        stbStopFanTest(app,tel)
+        currentProgressbarValue = 100
+        app.ptc_update_msg("updateFanTestProgress","Fan Test Failed ",str(currentProgressbarValue))
+        app.ptc_update_msg("updateFanTestResult","FAIL",'')
+        resultFlag = resultFlag[:FAN_TEST] + "0" + resultFlag[FAN_TEST+1:]
+
+    #Lnb Test
+    currentProgressbarValue = 20
+    matchStr18V = "18V"
+    matchStr22k ="22k:on"
+    print "LNB 18V ON and 22Khz ON"
+    app.ptc_update_msg("updateLnbTestProgress","Test Initiated",str(currentProgressbarValue))
+    tel.telWrite(command_list[TestCommnad.LNB_HIGH_22K_ON])
+    time.sleep(1)
+    data = tel.telReadSocket(app)
+    if not hddformatepass :
+        hddformatepass = re.search(formatCompleteString, data)
+    currentProgressbarValue = 80
+    app.ptc_update_msg("updateLnbTestProgress","Test Progress",str(currentProgressbarValue))
+    match = re.search(matchStr18V,data)
+    match1 = re.search(matchStr22k,data)
+    if match and match1:
+        currentProgressbarValue = 100
+        app.ptc_update_msg("updateLnbTestProgress","Test Done",str(currentProgressbarValue))
+        app.ptc_update_msg("updateLnbTestResult","PASS",'')
+        resultFlag = resultFlag[:LNB_TEST] + "1" + resultFlag[LNB_TEST+1:]
+    else:
+        currentProgressbarValue = 100
+        app.ptc_update_msg("updateLnbTestProgress","Test Done",str(currentProgressbarValue))
+        app.ptc_update_msg("updateLnbTestResult","FAIL",'')
+        resultFlag = resultFlag[:LNB_TEST] + "0" + resultFlag[LNB_TEST+1:]
+
+    #check format passed
+    if not match_hddfail and not hddformatepass :
+        timecount = 0
+        while timecount < 10 and not hddformatepass :
+            QtCore.QCoreApplication.processEvents()
+            data = tel.telReadSocket(app)
+            hddformatepass = re.search(formatCompleteString, data)
+            if not hddformatepass :
+                timecount = timecount + 1
+                time.sleep(1)
+                print timecount
+
+    currentProgressbarValue = 100
+    app.ptc_update_msg("updateHddTestProgress","HDD Test Done",str(currentProgressbarValue))
+
+    if not hddformatepass or match_hddfail:
+        app.ptc_update_msg("updateHddTestResult","FAIL",'')
+        resultFlag = resultFlag[:HDD_TEST] + "0" + resultFlag[HDD_TEST+1:]
+    else :
+        app.ptc_update_msg("updateHddTestResult","PASS",'')
+        resultFlag = resultFlag[:HDD_TEST] + "1" + resultFlag[HDD_TEST+1:]
+
 def stbPerformHddTest(app,tel):
     #Send Ctrl C to stop previous running tests
     tel.telWrite('\x03') #ctrl + c
@@ -2031,7 +2269,7 @@ except AttributeError:
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
     myapp = SkedYesUI()
-    myapp.setWindowTitle(_translate("SkedYes", "SKED YES V1.12", None))
+    myapp.setWindowTitle(_translate("SkedYes", "SKED YES V1.13", None))
 
     timenow = '%s' % (time.ctime(time.time()))
     myapp.ui.dateAndTime.setText(timenow)
