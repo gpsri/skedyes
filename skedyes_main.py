@@ -405,6 +405,7 @@ class SkedYesUI(QtGui.QMainWindow):
         self.tunerTestOptionUpdate()
         self.updateConnectionStatus("Not Connected ")
         self.resetButton()
+        self.resetValues()
 
 
     def setFocus(self):
@@ -486,7 +487,7 @@ class SkedYesUI(QtGui.QMainWindow):
         self.ui.irStopButton.clicked.disconnect()
         self.ui.hdcpStartButton.clicked.disconnect()
         self.ui.uiUpdateStartButton.clicked.disconnect()
-        self.ui.autoTestButton.setChecked(False)
+        #self.ui.autoTestButton.setChecked(False)
 
 
     def resetValues(self):
@@ -2269,7 +2270,7 @@ except AttributeError:
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
     myapp = SkedYesUI()
-    myapp.setWindowTitle(_translate("SkedYes", "SKED YES V1.13", None))
+    myapp.setWindowTitle(_translate("SkedYes", "SKED YES V1.14", None))
 
     timenow = '%s' % (time.ctime(time.time()))
     myapp.ui.dateAndTime.setText(timenow)
