@@ -50,8 +50,8 @@
   <widget class="QLabel" name="telnetConnection">
    <property name="geometry">
     <rect>
-     <x>40</x>
-     <y>80</y>
+     <x>210</x>
+     <y>50</y>
      <width>260</width>
      <height>20</height>
     </rect>
@@ -87,7 +87,7 @@
    <property name="geometry">
     <rect>
      <x>40</x>
-     <y>690</y>
+     <y>730</y>
      <width>680</width>
      <height>20</height>
     </rect>
@@ -105,7 +105,7 @@
    <property name="geometry">
     <rect>
      <x>40</x>
-     <y>570</y>
+     <y>610</y>
      <width>440</width>
      <height>111</height>
     </rect>
@@ -336,9 +336,9 @@
    <property name="geometry">
     <rect>
      <x>40</x>
-     <y>120</y>
+     <y>80</y>
      <width>90</width>
-     <height>20</height>
+     <height>30</height>
     </rect>
    </property>
    <property name="font">
@@ -358,7 +358,7 @@
     <enum>QFrame::WinPanel</enum>
    </property>
    <property name="text">
-    <string>HDD Test</string>
+    <string>1.HDD Test</string>
    </property>
    <property name="margin">
     <number>4</number>
@@ -371,9 +371,9 @@
    <property name="geometry">
     <rect>
      <x>40</x>
-     <y>150</y>
+     <y>120</y>
      <width>90</width>
-     <height>20</height>
+     <height>30</height>
     </rect>
    </property>
    <property name="font">
@@ -390,7 +390,7 @@
     <enum>QFrame::WinPanel</enum>
    </property>
    <property name="text">
-    <string>USB Test</string>
+    <string>2.USB Test</string>
    </property>
    <property name="margin">
     <number>4</number>
@@ -403,9 +403,9 @@
    <property name="geometry">
     <rect>
      <x>40</x>
-     <y>180</y>
+     <y>160</y>
      <width>90</width>
-     <height>20</height>
+     <height>30</height>
     </rect>
    </property>
    <property name="font">
@@ -422,7 +422,7 @@
     <enum>QFrame::WinPanel</enum>
    </property>
    <property name="text">
-    <string>Smartcard </string>
+    <string>3.Smartcard </string>
    </property>
    <property name="margin">
     <number>4</number>
@@ -435,9 +435,9 @@
    <property name="geometry">
     <rect>
      <x>140</x>
-     <y>120</y>
+     <y>80</y>
      <width>120</width>
-     <height>20</height>
+     <height>30</height>
     </rect>
    </property>
    <property name="font">
@@ -453,9 +453,9 @@
    <property name="geometry">
     <rect>
      <x>140</x>
-     <y>150</y>
+     <y>120</y>
      <width>120</width>
-     <height>20</height>
+     <height>30</height>
     </rect>
    </property>
    <property name="font">
@@ -471,9 +471,9 @@
    <property name="geometry">
     <rect>
      <x>140</x>
-     <y>180</y>
+     <y>160</y>
      <width>120</width>
-     <height>20</height>
+     <height>30</height>
     </rect>
    </property>
    <property name="font">
@@ -489,9 +489,9 @@
    <property name="geometry">
     <rect>
      <x>270</x>
-     <y>120</y>
+     <y>80</y>
      <width>48</width>
-     <height>20</height>
+     <height>30</height>
     </rect>
    </property>
    <property name="font">
@@ -525,9 +525,9 @@
    <property name="geometry">
     <rect>
      <x>270</x>
-     <y>150</y>
+     <y>120</y>
      <width>48</width>
-     <height>20</height>
+     <height>30</height>
     </rect>
    </property>
    <property name="font">
@@ -561,9 +561,9 @@
    <property name="geometry">
     <rect>
      <x>270</x>
-     <y>180</y>
+     <y>160</y>
      <width>48</width>
-     <height>20</height>
+     <height>30</height>
     </rect>
    </property>
    <property name="font">
@@ -619,8 +619,8 @@
   <widget class="QLabel" name="labelTemperature">
    <property name="geometry">
     <rect>
-     <x>510</x>
-     <y>510</y>
+     <x>350</x>
+     <y>540</y>
      <width>80</width>
      <height>20</height>
     </rect>
@@ -637,8 +637,8 @@
   <widget class="QLabel" name="labelTemperatureValue">
    <property name="geometry">
     <rect>
-     <x>580</x>
-     <y>510</y>
+     <x>430</x>
+     <y>540</y>
      <width>60</width>
      <height>20</height>
     </rect>
@@ -658,9 +658,9 @@
    <property name="geometry">
     <rect>
      <x>440</x>
-     <y>120</y>
+     <y>80</y>
      <width>60</width>
-     <height>20</height>
+     <height>30</height>
     </rect>
    </property>
    <property name="font">
@@ -676,9 +676,9 @@
    <property name="geometry">
     <rect>
      <x>440</x>
-     <y>150</y>
+     <y>120</y>
      <width>60</width>
-     <height>20</height>
+     <height>30</height>
     </rect>
    </property>
    <property name="font">
@@ -694,9 +694,9 @@
    <property name="geometry">
     <rect>
      <x>440</x>
-     <y>180</y>
+     <y>160</y>
      <width>60</width>
-     <height>20</height>
+     <height>30</height>
     </rect>
    </property>
    <property name="font">
@@ -712,9 +712,9 @@
    <property name="geometry">
     <rect>
      <x>510</x>
-     <y>150</y>
+     <y>120</y>
      <width>60</width>
-     <height>20</height>
+     <height>30</height>
     </rect>
    </property>
    <property name="font">
@@ -730,9 +730,9 @@
    <property name="geometry">
     <rect>
      <x>510</x>
-     <y>180</y>
+     <y>160</y>
      <width>60</width>
-     <height>20</height>
+     <height>30</height>
     </rect>
    </property>
    <property name="font">
@@ -748,9 +748,9 @@
    <property name="geometry">
     <rect>
      <x>510</x>
-     <y>120</y>
+     <y>80</y>
      <width>60</width>
-     <height>20</height>
+     <height>30</height>
     </rect>
    </property>
    <property name="font">
@@ -765,8 +765,8 @@
   <widget class="QRadioButton" name="autoTestButton">
    <property name="geometry">
     <rect>
-     <x>330</x>
-     <y>80</y>
+     <x>610</x>
+     <y>140</y>
      <width>100</width>
      <height>20</height>
     </rect>
@@ -789,16 +789,16 @@
     <bool>false</bool>
    </property>
    <property name="autoExclusive">
-    <bool>false</bool>
+    <bool>true</bool>
    </property>
   </widget>
   <widget class="QPushButton" name="fanStopButton">
    <property name="geometry">
     <rect>
      <x>510</x>
-     <y>210</y>
+     <y>200</y>
      <width>60</width>
-     <height>20</height>
+     <height>30</height>
     </rect>
    </property>
    <property name="font">
@@ -814,9 +814,9 @@
    <property name="geometry">
     <rect>
      <x>440</x>
-     <y>210</y>
+     <y>200</y>
      <width>60</width>
-     <height>20</height>
+     <height>30</height>
     </rect>
    </property>
    <property name="font">
@@ -832,9 +832,9 @@
    <property name="geometry">
     <rect>
      <x>270</x>
-     <y>210</y>
+     <y>200</y>
      <width>48</width>
-     <height>20</height>
+     <height>30</height>
     </rect>
    </property>
    <property name="font">
@@ -868,9 +868,9 @@
    <property name="geometry">
     <rect>
      <x>140</x>
-     <y>210</y>
+     <y>200</y>
      <width>120</width>
-     <height>20</height>
+     <height>30</height>
     </rect>
    </property>
    <property name="font">
@@ -886,9 +886,9 @@
    <property name="geometry">
     <rect>
      <x>40</x>
-     <y>210</y>
+     <y>200</y>
      <width>90</width>
-     <height>20</height>
+     <height>30</height>
     </rect>
    </property>
    <property name="font">
@@ -905,7 +905,7 @@
     <enum>QFrame::WinPanel</enum>
    </property>
    <property name="text">
-    <string>Fan Test</string>
+    <string>4.Fan Test</string>
    </property>
    <property name="margin">
     <number>4</number>
@@ -918,9 +918,9 @@
    <property name="geometry">
     <rect>
      <x>440</x>
-     <y>300</y>
+     <y>240</y>
      <width>60</width>
-     <height>20</height>
+     <height>30</height>
     </rect>
    </property>
    <property name="font">
@@ -936,9 +936,9 @@
    <property name="geometry">
     <rect>
      <x>40</x>
-     <y>300</y>
+     <y>240</y>
      <width>90</width>
-     <height>20</height>
+     <height>30</height>
     </rect>
    </property>
    <property name="font">
@@ -955,7 +955,7 @@
     <enum>QFrame::WinPanel</enum>
    </property>
    <property name="text">
-    <string>VFD Test</string>
+    <string>5.VFD Test</string>
    </property>
    <property name="margin">
     <number>4</number>
@@ -968,9 +968,9 @@
    <property name="geometry">
     <rect>
      <x>140</x>
-     <y>300</y>
+     <y>240</y>
      <width>120</width>
-     <height>20</height>
+     <height>30</height>
     </rect>
    </property>
    <property name="font">
@@ -986,9 +986,9 @@
    <property name="geometry">
     <rect>
      <x>270</x>
-     <y>300</y>
+     <y>240</y>
      <width>48</width>
-     <height>20</height>
+     <height>30</height>
     </rect>
    </property>
    <property name="font">
@@ -1022,9 +1022,9 @@
    <property name="geometry">
     <rect>
      <x>510</x>
-     <y>300</y>
+     <y>240</y>
      <width>60</width>
-     <height>20</height>
+     <height>30</height>
     </rect>
    </property>
    <property name="font">
@@ -1040,9 +1040,9 @@
    <property name="geometry">
     <rect>
      <x>140</x>
-     <y>360</y>
+     <y>280</y>
      <width>120</width>
-     <height>20</height>
+     <height>30</height>
     </rect>
    </property>
    <property name="font">
@@ -1058,9 +1058,9 @@
    <property name="geometry">
     <rect>
      <x>40</x>
-     <y>360</y>
+     <y>280</y>
      <width>90</width>
-     <height>20</height>
+     <height>30</height>
     </rect>
    </property>
    <property name="font">
@@ -1077,7 +1077,7 @@
     <enum>QFrame::WinPanel</enum>
    </property>
    <property name="text">
-    <string>Led Test</string>
+    <string>6.Led Test</string>
    </property>
    <property name="margin">
     <number>4</number>
@@ -1090,9 +1090,9 @@
    <property name="geometry">
     <rect>
      <x>270</x>
-     <y>360</y>
+     <y>280</y>
      <width>48</width>
-     <height>20</height>
+     <height>30</height>
     </rect>
    </property>
    <property name="font">
@@ -1126,9 +1126,9 @@
    <property name="geometry">
     <rect>
      <x>510</x>
-     <y>360</y>
+     <y>280</y>
      <width>60</width>
-     <height>20</height>
+     <height>30</height>
     </rect>
    </property>
    <property name="font">
@@ -1144,9 +1144,9 @@
    <property name="geometry">
     <rect>
      <x>440</x>
-     <y>360</y>
+     <y>280</y>
      <width>60</width>
-     <height>20</height>
+     <height>30</height>
     </rect>
    </property>
    <property name="font">
@@ -1162,7 +1162,7 @@
    <property name="geometry">
     <rect>
      <x>40</x>
-     <y>480</y>
+     <y>540</y>
      <width>90</width>
      <height>20</height>
     </rect>
@@ -1181,8 +1181,8 @@
   <widget class="QLabel" name="handleAppSwUpdate">
    <property name="geometry">
     <rect>
-     <x>410</x>
-     <y>480</y>
+     <x>310</x>
+     <y>500</y>
      <width>90</width>
      <height>20</height>
     </rect>
@@ -1201,10 +1201,10 @@
   <widget class="QPushButton" name="hdcpStartButton">
    <property name="geometry">
     <rect>
-     <x>140</x>
-     <y>480</y>
+     <x>130</x>
+     <y>530</y>
      <width>60</width>
-     <height>20</height>
+     <height>30</height>
     </rect>
    </property>
    <property name="font">
@@ -1219,10 +1219,10 @@
   <widget class="QPushButton" name="uiUpdateStartButton">
    <property name="geometry">
     <rect>
-     <x>510</x>
-     <y>480</y>
+     <x>420</x>
+     <y>500</y>
      <width>60</width>
-     <height>20</height>
+     <height>30</height>
     </rect>
    </property>
    <property name="font">
@@ -1238,7 +1238,7 @@
    <property name="geometry">
     <rect>
      <x>40</x>
-     <y>540</y>
+     <y>580</y>
      <width>60</width>
      <height>20</height>
     </rect>
@@ -1257,8 +1257,8 @@
   <widget class="QLabel" name="statusMsgLabel">
    <property name="geometry">
     <rect>
-     <x>140</x>
-     <y>540</y>
+     <x>100</x>
+     <y>580</y>
      <width>340</width>
      <height>20</height>
     </rect>
@@ -1276,9 +1276,9 @@
    <property name="geometry">
     <rect>
      <x>330</x>
-     <y>210</y>
+     <y>200</y>
      <width>100</width>
-     <height>20</height>
+     <height>30</height>
     </rect>
    </property>
    <property name="font">
@@ -1309,9 +1309,9 @@
    <property name="geometry">
     <rect>
      <x>440</x>
-     <y>390</y>
+     <y>440</y>
      <width>60</width>
-     <height>20</height>
+     <height>30</height>
     </rect>
    </property>
    <property name="font">
@@ -1327,9 +1327,9 @@
    <property name="geometry">
     <rect>
      <x>40</x>
-     <y>390</y>
+     <y>440</y>
      <width>90</width>
-     <height>20</height>
+     <height>30</height>
     </rect>
    </property>
    <property name="font">
@@ -1346,7 +1346,7 @@
     <enum>QFrame::WinPanel</enum>
    </property>
    <property name="text">
-    <string>IR Test</string>
+    <string>10.IR Test</string>
    </property>
    <property name="margin">
     <number>4</number>
@@ -1359,9 +1359,9 @@
    <property name="geometry">
     <rect>
      <x>510</x>
-     <y>390</y>
+     <y>440</y>
      <width>60</width>
-     <height>20</height>
+     <height>30</height>
     </rect>
    </property>
    <property name="font">
@@ -1377,9 +1377,9 @@
    <property name="geometry">
     <rect>
      <x>140</x>
-     <y>390</y>
+     <y>440</y>
      <width>120</width>
-     <height>20</height>
+     <height>30</height>
     </rect>
    </property>
    <property name="font">
@@ -1395,9 +1395,9 @@
    <property name="geometry">
     <rect>
      <x>270</x>
-     <y>390</y>
+     <y>440</y>
      <width>48</width>
-     <height>20</height>
+     <height>30</height>
     </rect>
    </property>
    <property name="font">
@@ -1431,9 +1431,9 @@
    <property name="geometry">
     <rect>
      <x>440</x>
-     <y>330</y>
+     <y>400</y>
      <width>60</width>
-     <height>20</height>
+     <height>30</height>
     </rect>
    </property>
    <property name="font">
@@ -1449,9 +1449,9 @@
    <property name="geometry">
     <rect>
      <x>40</x>
-     <y>330</y>
+     <y>400</y>
      <width>90</width>
-     <height>20</height>
+     <height>30</height>
     </rect>
    </property>
    <property name="font">
@@ -1468,7 +1468,7 @@
     <enum>QFrame::WinPanel</enum>
    </property>
    <property name="text">
-    <string>Button Test</string>
+    <string>9.Button Test</string>
    </property>
    <property name="margin">
     <number>4</number>
@@ -1481,9 +1481,9 @@
    <property name="geometry">
     <rect>
      <x>510</x>
-     <y>330</y>
+     <y>400</y>
      <width>60</width>
-     <height>20</height>
+     <height>30</height>
     </rect>
    </property>
    <property name="font">
@@ -1499,9 +1499,9 @@
    <property name="geometry">
     <rect>
      <x>140</x>
-     <y>330</y>
+     <y>400</y>
      <width>120</width>
-     <height>20</height>
+     <height>30</height>
     </rect>
    </property>
    <property name="font">
@@ -1517,9 +1517,9 @@
    <property name="geometry">
     <rect>
      <x>270</x>
-     <y>330</y>
+     <y>400</y>
      <width>48</width>
-     <height>20</height>
+     <height>30</height>
     </rect>
    </property>
    <property name="font">
@@ -1553,9 +1553,9 @@
    <property name="geometry">
     <rect>
      <x>330</x>
-     <y>390</y>
+     <y>440</y>
      <width>100</width>
-     <height>20</height>
+     <height>30</height>
     </rect>
    </property>
    <property name="font">
@@ -1586,9 +1586,9 @@
    <property name="geometry">
     <rect>
      <x>330</x>
-     <y>330</y>
+     <y>400</y>
      <width>100</width>
-     <height>20</height>
+     <height>30</height>
     </rect>
    </property>
    <property name="font">
@@ -1619,7 +1619,7 @@
    <property name="geometry">
     <rect>
      <x>40</x>
-     <y>450</y>
+     <y>500</y>
      <width>90</width>
      <height>20</height>
     </rect>
@@ -1638,10 +1638,10 @@
   <widget class="QLabel" name="uiUpgradeResult">
    <property name="geometry">
     <rect>
-     <x>590</x>
-     <y>480</y>
+     <x>490</x>
+     <y>500</y>
      <width>48</width>
-     <height>20</height>
+     <height>30</height>
     </rect>
    </property>
    <property name="font">
@@ -1674,10 +1674,10 @@
   <widget class="QLabel" name="hdcpKeyResult">
    <property name="geometry">
     <rect>
-     <x>270</x>
-     <y>480</y>
+     <x>190</x>
+     <y>530</y>
      <width>48</width>
-     <height>20</height>
+     <height>30</height>
     </rect>
    </property>
    <property name="font">
@@ -1711,9 +1711,9 @@
    <property name="geometry">
     <rect>
      <x>510</x>
-     <y>270</y>
+     <y>360</y>
      <width>60</width>
-     <height>20</height>
+     <height>30</height>
     </rect>
    </property>
    <property name="font">
@@ -1729,9 +1729,9 @@
    <property name="geometry">
     <rect>
      <x>440</x>
-     <y>270</y>
+     <y>360</y>
      <width>60</width>
-     <height>20</height>
+     <height>30</height>
     </rect>
    </property>
    <property name="font">
@@ -1747,9 +1747,9 @@
    <property name="geometry">
     <rect>
      <x>40</x>
-     <y>270</y>
-     <width>91</width>
-     <height>20</height>
+     <y>360</y>
+     <width>90</width>
+     <height>30</height>
     </rect>
    </property>
    <property name="palette">
@@ -2184,7 +2184,7 @@
     <enum>QFrame::WinPanel</enum>
    </property>
    <property name="text">
-    <string>Tuner Test 1</string>
+    <string>8.Tuner Test 1</string>
    </property>
    <property name="margin">
     <number>4</number>
@@ -2197,9 +2197,9 @@
    <property name="geometry">
     <rect>
      <x>140</x>
-     <y>270</y>
+     <y>360</y>
      <width>120</width>
-     <height>20</height>
+     <height>30</height>
     </rect>
    </property>
    <property name="font">
@@ -2215,9 +2215,9 @@
    <property name="geometry">
     <rect>
      <x>270</x>
-     <y>270</y>
+     <y>360</y>
      <width>48</width>
-     <height>20</height>
+     <height>30</height>
     </rect>
    </property>
    <property name="font">
@@ -2251,9 +2251,9 @@
    <property name="geometry">
     <rect>
      <x>140</x>
-     <y>240</y>
+     <y>320</y>
      <width>120</width>
-     <height>20</height>
+     <height>30</height>
     </rect>
    </property>
    <property name="font">
@@ -2269,9 +2269,9 @@
    <property name="geometry">
     <rect>
      <x>510</x>
-     <y>240</y>
+     <y>320</y>
      <width>60</width>
-     <height>20</height>
+     <height>30</height>
     </rect>
    </property>
    <property name="font">
@@ -2287,9 +2287,9 @@
    <property name="geometry">
     <rect>
      <x>40</x>
-     <y>240</y>
+     <y>320</y>
      <width>90</width>
-     <height>20</height>
+     <height>30</height>
     </rect>
    </property>
    <property name="font">
@@ -2306,7 +2306,7 @@
     <enum>QFrame::WinPanel</enum>
    </property>
    <property name="text">
-    <string>Lnb Test</string>
+    <string>7.Lnb Test</string>
    </property>
    <property name="margin">
     <number>4</number>
@@ -2319,9 +2319,9 @@
    <property name="geometry">
     <rect>
      <x>330</x>
-     <y>240</y>
+     <y>320</y>
      <width>100</width>
-     <height>20</height>
+     <height>30</height>
     </rect>
    </property>
    <property name="font">
@@ -2352,9 +2352,9 @@
    <property name="geometry">
     <rect>
      <x>270</x>
-     <y>240</y>
+     <y>320</y>
      <width>48</width>
-     <height>20</height>
+     <height>30</height>
     </rect>
    </property>
    <property name="font">
@@ -2388,9 +2388,9 @@
    <property name="geometry">
     <rect>
      <x>440</x>
-     <y>240</y>
+     <y>320</y>
      <width>60</width>
-     <height>20</height>
+     <height>30</height>
     </rect>
    </property>
    <property name="font">
@@ -2406,9 +2406,9 @@
    <property name="geometry">
     <rect>
      <x>330</x>
-     <y>270</y>
+     <y>360</y>
      <width>100</width>
-     <height>20</height>
+     <height>30</height>
     </rect>
    </property>
    <property name="font">
@@ -2438,8 +2438,8 @@
   <widget class="QLabel" name="macAddressInputValue">
    <property name="geometry">
     <rect>
-     <x>140</x>
-     <y>450</y>
+     <x>130</x>
+     <y>500</y>
      <width>120</width>
      <height>20</height>
     </rect>
@@ -2459,6 +2459,116 @@
    </property>
    <property name="text">
     <string/>
+   </property>
+  </widget>
+  <widget class="QRadioButton" name="autoupdateUI">
+   <property name="geometry">
+    <rect>
+     <x>610</x>
+     <y>170</y>
+     <width>131</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>8</pointsize>
+    </font>
+   </property>
+   <property name="text">
+    <string>Auto Update UI</string>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>20</width>
+     <height>20</height>
+    </size>
+   </property>
+   <property name="autoRepeat">
+    <bool>false</bool>
+   </property>
+   <property name="autoExclusive">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QRadioButton" name="auto_test_none_Button">
+   <property name="geometry">
+    <rect>
+     <x>610</x>
+     <y>230</y>
+     <width>131</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>8</pointsize>
+    </font>
+   </property>
+   <property name="text">
+    <string>none</string>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>20</width>
+     <height>20</height>
+    </size>
+   </property>
+   <property name="autoRepeat">
+    <bool>false</bool>
+   </property>
+   <property name="autoExclusive">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QRadioButton" name="autohdcp">
+   <property name="geometry">
+    <rect>
+     <x>610</x>
+     <y>200</y>
+     <width>131</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>8</pointsize>
+    </font>
+   </property>
+   <property name="text">
+    <string>Autohdcp</string>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>20</width>
+     <height>20</height>
+    </size>
+   </property>
+   <property name="autoRepeat">
+    <bool>false</bool>
+   </property>
+   <property name="autoExclusive">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="save_auto_Button">
+   <property name="geometry">
+    <rect>
+     <x>610</x>
+     <y>260</y>
+     <width>80</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>8</pointsize>
+     <weight>75</weight>
+     <bold>true</bold>
+    </font>
+   </property>
+   <property name="text">
+    <string>Save</string>
    </property>
   </widget>
  </widget>

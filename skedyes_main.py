@@ -292,7 +292,7 @@ class getPTCThread(QThread):
                     self.ptc_update_msg("updateUiUpgradeResult","PASS",'')
                     resultFlag = resultFlag[:UI_PRG] + "1" + resultFlag[UI_PRG+1:]
                 else:
-                    print "IR Test Failed"
+                    print "UI Test Failed"
                     self.ptc_update_msg("updateUiUpgradeResult","FAIL",'')
                     resultFlag = resultFlag[:UI_PRG] + "0" + resultFlag[UI_PRG+1:]
                 ptcTestIdx.testProgressFlag = False
@@ -348,6 +348,7 @@ class SkedYesUI(QtGui.QMainWindow):
         self.ui.setupUi(self)
         self.ui.connectToStbButton.clicked.connect(self.connectTheSTB)
         self.ui.disconnectButton.clicked.connect(self.disconectTheSTB)
+        self.ui.save_auto_Button.clicked.connect(self.saveTheAutoButton)
         self.ui.disconnectButton.setEnabled(False)
         self.ui.tunerStopButton.setEnabled(False)
         self.ui.hddStopButton.setEnabled(False)
@@ -372,6 +373,33 @@ class SkedYesUI(QtGui.QMainWindow):
         self.ui.uiUpgradeResult.setStyleSheet("QLabel { background-color : silver; color : gray; }");
         self.ui.lnbResult.setStyleSheet("QLabel { background-color : silver; color : gray; }");
 
+        if os.path.isfile("radiobutton.cfg") == True:
+            list_in = []
+            start_str = ""
+            end_str = ""
+            fp = open("radiobutton.cfg", "r")
+            line = fp.readline()
+            while line:
+                list_in.append(line)
+                line = fp.readline()
+            fp.close()
+            len_in = len(list_in)
+            idx = 0
+            while idx < len_in:
+                match = re.search("autobutton=", list_in[idx])
+
+                if list_in[idx].find("autobutton=") != -1:
+                    match = list_in[idx][list_in[idx].find("autobutton=") + len("autobutton=")]
+                    if match == '1':
+                        self.ui.autoTestButton.setChecked(True)
+                    elif match == '2':
+                        self.ui.autoupdateUI.setChecked(True)
+                    elif match == '3':
+                        self.ui.autohdcp.setChecked(True)
+                    elif match == '4':
+                        self.ui.auto_test_none_Button.setChecked(True)
+                idx = idx + 1
+
 
     def keyPressEvent(self, event):
         print("keyPressEvent")
@@ -387,6 +415,50 @@ class SkedYesUI(QtGui.QMainWindow):
         print "Call Enter Key"
         if ptcTestIdx.testProgressFlag == False:
             self.handleKeyEnter()
+
+    def saveTheAutoButton(self):
+        if os.path.isfile("radiobutton.cfg") == False:
+            fp = open("radiobutton.cfg", "w")
+            fp.close()
+        fp = open("radiobutton.cfg", "r")
+        line = fp.readline()
+        list_cfg = []
+        while line:
+            list_cfg.append(line)
+            line = fp.readline()
+        fp.close()
+        len_cfg_arg = len(list_cfg)
+        fp = open("radiobutton.cfg", "w")
+        idx = 0
+        update = False
+        while idx < len_cfg_arg:
+            if list_cfg[idx].find("autobutton=") != -1:
+                update = True
+                str = ""
+                if self.ui.autoTestButton.isChecked():
+                    str = "autobutton=1"
+                elif self.ui.autoupdateUI.isChecked():
+                    str = "autobutton=2"
+                elif self.ui.autohdcp.isChecked():
+                    str = "autobutton=3"
+                elif self.ui.auto_test_none_Button.isChecked():
+                    str = "autobutton=4"
+                fp.write(str + "\n")
+            else :
+                fp.write(list_cfg + "\n")
+            idx = idx + 1
+        if update == False :
+            str = ""
+            if self.ui.autoTestButton.isChecked():
+                str = "autobutton=1"
+            elif self.ui.autoupdateUI.isChecked():
+                str = "autobutton=2"
+            elif self.ui.autohdcp.isChecked():
+                str = "autobutton=3"
+            elif self.ui.auto_test_none_Button.isChecked():
+                str = "autobutton=4"
+            fp.write(str + "\n")
+        fp.close()
 
     def disconectTheSTB(self):
 
@@ -524,8 +596,8 @@ class SkedYesUI(QtGui.QMainWindow):
         self.ui.fpResult.setStyleSheet("QLabel { background-color : silver; color : gray; }");
         self.ui.irResult.setStyleSheet("QLabel { background-color : silver; color : gray; }");
         self.ui.buttonResult.setStyleSheet("QLabel { background-color : silver; color : gray; }");
-        self.ui.hdcpKeyResult.setStyleSheet("QLabel { background-color : silver; color : gray; }");
-        self.ui.uiUpgradeResult.setStyleSheet("QLabel { background-color : silver; color : gray; }");
+        #self.ui.hdcpKeyResult.setStyleSheet("QLabel { background-color : silver; color : gray; }");
+        #self.ui.uiUpgradeResult.setStyleSheet("QLabel { background-color : silver; color : gray; }");
         self.ui.lnbResult.setStyleSheet("QLabel { background-color : silver; color : gray; }");
         self.ui.connectResult_label.setStyleSheet("QLabel { background-color : silver; color : gray; }");
         self.ui.connectResult_label.clear()
@@ -597,7 +669,9 @@ class SkedYesUI(QtGui.QMainWindow):
         self.ui.hdcpStartButton.clicked.connect(self.startHdcpKeyProgram)
         self.ui.uiUpdateStartButton.clicked.connect(self.startUiUpgrade)
         self.ui.statusMsgLabel.setStyleSheet("QLabel { background-color : black; color : white; }")
-
+        self.ui.hdcpKeyResult.setStyleSheet("QLabel { background-color : silver; color : gray; }");
+        self.ui.uiUpgradeResult.setStyleSheet("QLabel { background-color : silver; color : gray; }");
+        self.ui.progressBar.setProperty("value", 0)
         if os.path.isfile("mac/mac.cfg") == False:
             self.ui.hdcpStartButton.setEnabled(False)
         else :
@@ -614,6 +688,10 @@ class SkedYesUI(QtGui.QMainWindow):
         if(self.ui.autoTestButton.isChecked()):
             #self.startHddTest()
             self.startAutoTest()
+        if(self.ui.autohdcp.isChecked()):
+            self.startHdcpKeyProgram()
+        if(self.ui.autoupdateUI.isChecked()):
+            self.startUiUpgrade()
 
     def generateMacList(self):
 
@@ -766,6 +844,13 @@ class SkedYesUI(QtGui.QMainWindow):
     def startAutoTest(self):
         self.msgQ.put("startAutoTest")
 
+    def startAutoupdateUI(self):
+        if self.ui.hdcpStartButton.isEnabled():
+            self.msgQ.put("startAutoupdateUI")
+    def startAutohdcp(self):
+        if self.ui.hdcpStartButton.isEnabled():
+            self.msgQ.put("startAutouhdcp")
+
     def startHddTest(self):
         self.tunerTestOptionUpdate()
         self.msgQ.put("startHddTest")
@@ -864,7 +949,7 @@ class SkedYesUI(QtGui.QMainWindow):
         ptcTestIdx.current_idx = ptcTestIdx.HDCP_PRG
         self.setFocus()
         self.ui.hdcpStartButton.setEnabled(False)
-        self.ui.hdcpKeyResult.setStyleSheet("QLabel { background-color : gray; color : black; }");
+        #self.ui.hdcpKeyResult.setStyleSheet("QLabel { background-color : gray; color : black; }");
 
     def startUiUpgrade(self):
         self.tunerTestOptionUpdate()
@@ -893,6 +978,8 @@ class SkedYesUI(QtGui.QMainWindow):
             self.updateModelName(value)
         elif(option == "updateHddSerial"):
             self.updateHddSerailNumber(value)
+        elif(option == "updatemainbar"):
+            self.updateMainProgress(value,int(msg))
         elif(option == "updateHddTestProgress"):
             self.updateHddTestProgress(value,int(msg))
         elif(option == "updateHddTestResult"):
@@ -1061,6 +1148,10 @@ class SkedYesUI(QtGui.QMainWindow):
         #if(self.ui.autoTestButton.isChecked()):
             #self.startUsbTest()
             # self.startHddTest()
+
+    def updateMainProgress(self, text, value):
+        self.ui.progressBar.setProperty("value", value)
+        self.ui.statusMsgLabel.setText(text)
 
     def updateHddTestProgress(self,text, value):
         self.ui.hddTestProgressBar.setProperty("value",value)
@@ -1523,6 +1614,197 @@ def stbStopUsbTest(app,tel):
     print("USB Test Stopped")
     tel.telWrite('\x03') #ctrl + c
 
+def stbStartAutoupdateUI_hdcp(app, tel):
+    global resultFlag
+    hdcpKeyResponseMatchString1 = "Get key from key server"
+    hdcpKeyResponseMatchString2 = "Key Server IP"
+    hdcpKeyResponseMatchString3 = "MAC"
+    hdcpKeyResponseMatchString4 = "Handling HDCP key is successful"
+    hdcpKeyResponseMatchString5 = "Handling HDCP key is failed"
+    hdcpKeyResponseMatchString6 = "HDCP1.4 key isn't exist"
+    hdcpKeyResponseMatchString7 = "HDCP2.2 key isn't exist"
+    print "start hdcp key programming"
+    macadd = myapp.ui.macAddressInputValue.text()
+    mac = str(macadd)
+    mac = mac.upper()
+    filename = "mac/" + mac + ".txt"
+    if os.path.isfile(filename) == True:
+        print("REPATE MAC!!!!!!!!!!!!!!!!!!")
+        print(mac)
+        print("REPATE MAC!!!!!!!!!!!!!!!!!!")
+        app.ptc_update_msg("updateHdcpKeyResult","FAIL",'')
+        resultFlag = resultFlag[:HDCP_PRG] + "0" + resultFlag[HDCP_PRG+1:]
+        return 0
+    # Write MAC Address
+    statusStr = "Write MAC successfully"
+    tel.telWrite('\x03') #ctrl + c
+    time.sleep(1)
+    write_cmd = command_list[TestCommnad.WRITE_MAC] +" "+macadd
+    tel.telWrite(write_cmd)
+    time.sleep(1)
+    print time.time()
+    waitforfind = 1
+    while waitforfind:
+        data = tel.telReadSocket(app)
+        match = re.search(statusStr,data)
+        if match :
+            waitforfind = 0
+            print data
+
+    macaddList = stbGetMacAddress(app, tel)
+    ethMac = "%s" % macaddList[0]
+    wifiMac = "%s" % macaddList[1]
+    print ethMac
+    print wifiMac
+    app.ptc_update_msg("updateEthMacAddr",ethMac,"")
+    app.ptc_update_msg("updateWifiMacAddr",wifiMac,"")
+
+    tel.telWrite('\x03') #ctrl + c
+    tel.telWrite(command_list[TestCommnad.PROGRAM_HDCP])
+    data = tel.telReadSocket(app)
+    time.sleep(.5)
+    match = re.search(hdcpKeyResponseMatchString1,data)
+    count = 0
+    if match:
+        tel.telWrite("Y")
+        time.sleep(.2)
+        data = tel.telReadSocket(app)
+        match = re.search(hdcpKeyResponseMatchString2,data)
+        if match:
+            tel.telWrite("192.192.192.3")
+            time.sleep(.2)
+            data = tel.telReadSocket(app)
+            match = re.search(hdcpKeyResponseMatchString3,data)
+            if match:
+                macadd =str( myapp.ui.macAddressInputValue.text())
+                print [macadd]
+                tel.telWrite(macadd)
+                time.sleep(.2)
+                matchcase = 1
+                count = 0
+                while matchcase or count < 30:
+                    data = tel.telReadSocket(app)
+                    match = re.search(hdcpKeyResponseMatchString4,data)
+                    match1 = re.search(hdcpKeyResponseMatchString5,data)
+                    if  match1:
+                        app.ptc_update_msg("updateHdcpKeyResult","FAIL","")
+                        revertMACAddress()
+                        resultFlag = resultFlag[:HDCP_PRG] + "0" + resultFlag[HDCP_PRG+1:]
+                        return 0
+                    elif match:
+                        #verify the Keys 1.x
+                        tel.telWrite(command_list[TestCommnad.VERIFY_HDCP_1X])
+                        time.sleep(1)
+                        data = tel.telReadSocket(app)
+                        match = re.search(hdcpKeyResponseMatchString6,data)
+                        if match:
+                            print "HDCP 1.x Validation Fail Please check the mac address"
+                            app.ptc_update_msg("updateHdcpKeyResult","FAIL","")
+                            revertMACAddress()
+                            resultFlag = resultFlag[:HDCP_PRG] + "0" + resultFlag[HDCP_PRG+1:]
+                            return 0
+                        #verify the Keys 2.x
+                        tel.telWrite(command_list[TestCommnad.VERIFY_HDCP_2X])
+                        time.sleep(1)
+                        data = tel.telReadSocket(app)
+                        match = re.search(hdcpKeyResponseMatchString7,data)
+                        if match:
+                            print "HDCP 2.x Validation Fail Please check the mac address"
+                            app.ptc_update_msg("updateHdcpKeyResult","FAIL","")
+                            revertMACAddress()
+                            resultFlag = resultFlag[:HDCP_PRG] + "0" + resultFlag[HDCP_PRG+1:]
+                            return 0
+
+                        mac = str( myapp.ui.macAddressInputValue.text())
+                        mac = mac.upper()
+                        filename = "mac/" + mac.upper() + ".txt"
+                        app.ptc_update_msg("updateHdcpKeyResult","PASS","")
+                        resultFlag = resultFlag[:HDCP_PRG] + "1" + resultFlag[HDCP_PRG+1:]
+                        record = open(filename, "w")
+                        record .write(mac.upper())
+                        record .close()
+                        rmMACAddress()
+                        count = 50
+
+                    else:
+                        count +=1
+                        continue
+    else:
+        app.ptc_update_msg("updateHdcpKeyResult","FAIL","")
+        resultFlag = resultFlag[:HDCP_PRG] + "0" + resultFlag[HDCP_PRG+1:]
+        return 0
+
+    if count != 50: # updateHdcpKeyResult Fail
+        app.ptc_update_msg("updateHdcpKeyResult","FAIL","")
+        resultFlag = resultFlag[:HDCP_PRG] + "0" + resultFlag[HDCP_PRG+1:]
+        return 0
+
+    currentProgressbarValue = 50
+    app.ptc_update_msg("updatemainbar", "update HDCP key done", str(currentProgressbarValue))
+    # Update UI
+
+    macaddList = stbGetMacAddress(app, tel)
+    ethMac = "%s" % macaddList[0]
+    wifiMac = "%s" % macaddList[1]
+    print ethMac
+    print wifiMac
+    defaultMAC = "00:12:22:FF:FF:00"
+    if defaultMAC in ethMac:
+        app.ptc_update_msg("updateHdcpKeyResult","FAIL","")
+        resultFlag = resultFlag[:HDCP_PRG] + "0" + resultFlag[HDCP_PRG+1:]
+        app.ptc_update_msg("updatemainbar", "MAC not change", str(24))
+        return 0
+
+    print "start UI Upgrade and OTP"
+    changeFwConfirmationMsg = "Are you sure want to change FW to"
+    changeToUECFWMatchStr = "Change firmware to UEC is successful"
+    otpStatusMatchStr = "006 Production OTP lock "
+    ret = stbDumpUecCode(app,tel)
+    if ret:
+        print "Code dump OK - going to do the code swap"
+        tel.telWrite(command_list[TestCommnad.UEC_FW_CODE_SWAP])
+        time.sleep(3)
+        data = tel.telReadSocket(app)
+        match = re.search(changeFwConfirmationMsg,data)
+        if match :
+            tel.telWrite("Y")
+            time.sleep(.2)
+            waitforfind = 1
+            while waitforfind:
+                data = tel.telReadSocket(app)
+                match = re.search(changeToUECFWMatchStr,data)
+                if match :
+                    waitforfind = 0
+                    print "Change firmware to UEC is successful"
+                    print data
+                else:
+                    continue
+
+        #upgradeFirmwareSuccesfull Do the OTP
+        tel.telWrite(command_list[TestCommnad.SET_OTP_CMD1])
+        time.sleep(1)
+        data = tel.telReadSocket(app)
+        tel.telWrite(command_list[TestCommnad.SET_OTP_CMD2])
+        time.sleep(1)
+        waitforfind = 1
+        data = ""
+        while waitforfind:
+            data = tel.telReadSocket(app)
+            match = re.search(otpStatusMatchStr,data)
+            if match :
+                waitforfind = 0
+                print "Change OTP to UEC is successful"
+                print data
+            else:
+                continue
+
+        currentProgressbarValue = 100
+        app.ptc_update_msg("updateUiUpgradeResult","PASS","")
+        app.ptc_update_msg("updateMainProgress", "Ui upgrade done", str(currentProgressbarValue))
+        resultFlag = resultFlag[:UI_PRG] + "1" + resultFlag[UI_PRG+1:]
+        return 1
+
+
 # ['\r', '\n', '#', ' ', 'h', 'd', 'd', 'S', 'e', 'r', 'i', 'a', 'l', 'N', 'u', 'm', 'b', 'e', 'r', '\r', '\n', 'Z', '9', 'C', '5', 'P', 'J', '9', '3', '\r', '\n', '#', ' ']
 
 def stbStartAutoTest(app, tel):
@@ -1706,6 +1988,79 @@ def stbStartAutoTest(app, tel):
         app.ptc_update_msg("updateFanTestProgress","Fan Test Failed ",str(currentProgressbarValue))
         app.ptc_update_msg("updateFanTestResult","FAIL",'')
         resultFlag = resultFlag[:FAN_TEST] + "0" + resultFlag[FAN_TEST+1:]
+
+    #VFD Test(FP)
+    retry = 1
+    retrycnt = 0
+    #Send Ctrl C to stop previous running tests
+    tel.telWrite('\x03') #ctrl + c
+    currentProgressbarValue = 20
+    fpPassString = "act_gridon"
+    app.ptc_update_msg("updateFpTestProgress","Test Initiated",str(currentProgressbarValue))
+    command_list[TestCommnad.VFD_TEST] = "/root/htp/vfd -r -i -x 0"
+    tel.telWrite(command_list[TestCommnad.VFD_TEST])
+    time.sleep(2)
+    command_list[TestCommnad.VFD_TEST] = "/root/htp/vfd -r -i -x 1"
+    tel.telWrite(command_list[TestCommnad.VFD_TEST])
+    data = tel.telReadSocket(app)
+    time.sleep(2)
+    #print list(data)
+    if not hddformatepass :
+        hddformatepass = re.search(formatCompleteString, data)
+    match = re.search(fpPassString,data)
+
+    if match:
+        currentProgressbarValue = 100
+        app.ptc_update_msg("updateFpTestProgress","FP Test Passed ",str(currentProgressbarValue))
+        app.ptc_update_msg("updateFpTestResult","PASS",'')
+        resultFlag = resultFlag[:VFD_TEST] + "1 " + resultFlag[VFD_TEST+1:]
+    else:
+        app.ptc_update_msg("updateFpTestResult","FAIL",'')
+        resultFlag = resultFlag[:VFD_TEST] + "0" + resultFlag[VFD_TEST+1:]
+
+    #LED Test
+    #Send Ctrl C to stop previous running tests
+    tel.telWrite('\x03') #ctrl + c
+    retry = 1
+    retrycnt = 0
+    currentProgressbarValue = 20
+    ledPassString = "LED all on"
+    app.ptc_update_msg("updateLedTestProgress","Test Initiated",str(currentProgressbarValue))
+    command_list[TestCommnad.LED_TEST] = "led 0"
+    tel.telWrite(command_list[TestCommnad.LED_TEST])
+    time.sleep(2)
+    command_list[TestCommnad.LED_TEST] = "led 1"
+    tel.telWrite(command_list[TestCommnad.LED_TEST])
+    data = tel.telReadSocket(app)
+    time.sleep(2)
+    if not hddformatepass :
+        hddformatepass = re.search(formatCompleteString, data)
+    match = re.search(ledPassString,data)
+    if match:
+        currentProgressbarValue = 100
+        app.ptc_update_msg("updateLedTestProgress","Led Test Passed ",str(currentProgressbarValue))
+        return 1
+    else:
+        while retry :
+            data = tel.telReadSocket(app)
+            time.sleep(2)
+            if not hddformatepass :
+                hddformatepass = re.search(formatCompleteString, data)
+            match = re.search(ledPassString,data)
+            if match:
+                retry = 0
+                currentProgressbarValue = 100
+                app.ptc_update_msg("updateLedTestProgress","Led Test Passed ",str(currentProgressbarValue))
+                app.ptc_update_msg("updateLedTestResult","PASS",'')
+                resultFlag = resultFlag[:LED_TEST] + "1" + resultFlag[LED_TEST+1:]
+            else:
+                if(retrycnt > 5):
+                    currentProgressbarValue =  currentProgressbarValue + 6
+                    app.ptc_update_msg("updateLedTestProgress","Led Test Failed ",str(currentProgressbarValue))
+                    retry = 0
+                    app.ptc_update_msg("updateLedTestResult","FAIL",'')
+                    resultFlag = resultFlag[:LED_TEST] + "0" + resultFlag[LED_TEST+1:]
+                retrycnt = retrycnt + 1
 
     #Lnb Test
     currentProgressbarValue = 20
@@ -2150,6 +2505,42 @@ def stbDumpUecCode(app,tel) :
             continue
 
 def stbPerformUiUpgrade(app,tel):
+    #check MAC
+    macaddList = stbGetMacAddress(app, tel)
+    ethMac = "%s" % macaddList[0]
+    wifiMac = "%s" % macaddList[1]
+    print ethMac
+    print wifiMac
+    defaultMAC = "00:12:22:FF:FF:00"
+    if defaultMAC in ethMac:
+        app.ptc_update_msg("updateHdcpKeyResult","FAIL","")
+        app.ptc_update_msg("updatemainbar", "MAC not change", str(24))
+        return 0
+
+    # check the HDCP key
+    hdcpKeyResponseMatchString6 = "HDCP1.4 key isn't exist"
+    hdcpKeyResponseMatchString7 = "HDCP2.2 key isn't exist"
+    #verify the Keys 1.x
+    tel.telWrite(command_list[TestCommnad.VERIFY_HDCP_1X])
+    time.sleep(1)
+    data = tel.telReadSocket(app)
+    match = re.search(hdcpKeyResponseMatchString6,data)
+    if match:
+        print "HDCP 1.x Validation Fail Please check the mac address"
+        app.ptc_update_msg("updateHdcpKeyResult","FAIL","")
+        revertMACAddress()
+        return 0
+    #verify the Keys 2.x
+    tel.telWrite(command_list[TestCommnad.VERIFY_HDCP_2X])
+    time.sleep(1)
+    data = tel.telReadSocket(app)
+    match = re.search(hdcpKeyResponseMatchString7,data)
+    if match:
+        print "HDCP 2.x Validation Fail Please check the mac address"
+        app.ptc_update_msg("updateHdcpKeyResult","FAIL","")
+        revertMACAddress()
+        return 0
+
     print "start UI Upgrade and OTP"
     changeFwConfirmationMsg = "Are you sure want to change FW to"
     changeToUECFWMatchStr = "Change firmware to UEC is successful"
@@ -2270,7 +2661,7 @@ except AttributeError:
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
     myapp = SkedYesUI()
-    myapp.setWindowTitle(_translate("SkedYes", "SKED YES V1.14", None))
+    myapp.setWindowTitle(_translate("SkedYes", "SKED YES V1.15", None))
 
     timenow = '%s' % (time.ctime(time.time()))
     myapp.ui.dateAndTime.setText(timenow)
