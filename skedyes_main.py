@@ -136,6 +136,10 @@ class getPTCThread(QThread):
                 ptcTestIdx.testProgressFlag = True
                 stbStopTunerTest(self,self.telnetcli)
                 ptcTestIdx.testProgressFlag = False
+            elif (msg == "startAutoupdateUI_hdcp"):
+                ptcTestIdx.testProgressFlag = True
+                stbStartAutoupdateUI_hdcp(self, self.telnetcli)
+                ptcTestIdx.testProgressFlag = False
             elif (msg == "startAutoTest"):
                 ptcTestIdx.testProgressFlag = True
                 stbStartAutoTest(self, self.telnetcli)
@@ -393,7 +397,7 @@ class SkedYesUI(QtGui.QMainWindow):
                     if match == '1':
                         self.ui.autoTestButton.setChecked(True)
                     elif match == '2':
-                        self.ui.autoupdateUI.setChecked(True)
+                        self.ui.autoupdateUIhdcp.setChecked(True)
                     elif match == '3':
                         self.ui.autohdcp.setChecked(True)
                     elif match == '4':
@@ -437,7 +441,7 @@ class SkedYesUI(QtGui.QMainWindow):
                 str = ""
                 if self.ui.autoTestButton.isChecked():
                     str = "autobutton=1"
-                elif self.ui.autoupdateUI.isChecked():
+                elif self.ui.autoupdateUIhdcp.isChecked():
                     str = "autobutton=2"
                 elif self.ui.autohdcp.isChecked():
                     str = "autobutton=3"
@@ -451,7 +455,7 @@ class SkedYesUI(QtGui.QMainWindow):
             str = ""
             if self.ui.autoTestButton.isChecked():
                 str = "autobutton=1"
-            elif self.ui.autoupdateUI.isChecked():
+            elif self.ui.autoupdateUIhdcp.isChecked():
                 str = "autobutton=2"
             elif self.ui.autohdcp.isChecked():
                 str = "autobutton=3"
@@ -690,8 +694,8 @@ class SkedYesUI(QtGui.QMainWindow):
             self.startAutoTest()
         if(self.ui.autohdcp.isChecked()):
             self.startHdcpKeyProgram()
-        if(self.ui.autoupdateUI.isChecked()):
-            self.startUiUpgrade()
+        if(self.ui.autoupdateUIhdcp.isChecked()):
+            self.startAutoupdateUI_hdcp()
 
     def generateMacList(self):
 
@@ -844,13 +848,16 @@ class SkedYesUI(QtGui.QMainWindow):
     def startAutoTest(self):
         self.msgQ.put("startAutoTest")
 
-    def startAutoupdateUI(self):
-        if self.ui.hdcpStartButton.isEnabled():
-            self.msgQ.put("startAutoupdateUI")
-    def startAutohdcp(self):
-        if self.ui.hdcpStartButton.isEnabled():
-            self.msgQ.put("startAutouhdcp")
+#    def startAutoupdateUI(self):
+#        if self.ui.hdcpStartButton.isEnabled():
+#            self.msgQ.put("startAutoupdateUI")
+#    def startAutohdcp(self):
+#        if self.ui.hdcpStartButton.isEnabled():
+#            self.msgQ.put("startAutouhdcp")
 
+    def startAutoupdateUI_hdcp(self):
+        if self.ui.hdcpStartButton.isEnabled():
+            self.msgQ.put("startAutoupdateUI_hdcp")
     def startHddTest(self):
         self.tunerTestOptionUpdate()
         self.msgQ.put("startHddTest")
@@ -1714,7 +1721,6 @@ def stbStartAutoupdateUI_hdcp(app, tel):
                             revertMACAddress()
                             resultFlag = resultFlag[:HDCP_PRG] + "0" + resultFlag[HDCP_PRG+1:]
                             return 0
-
                         mac = str( myapp.ui.macAddressInputValue.text())
                         mac = mac.upper()
                         filename = "mac/" + mac.upper() + ".txt"
@@ -1725,7 +1731,7 @@ def stbStartAutoupdateUI_hdcp(app, tel):
                         record .close()
                         rmMACAddress()
                         count = 50
-
+                        matchcase = 0
                     else:
                         count +=1
                         continue
@@ -1738,11 +1744,9 @@ def stbStartAutoupdateUI_hdcp(app, tel):
         app.ptc_update_msg("updateHdcpKeyResult","FAIL","")
         resultFlag = resultFlag[:HDCP_PRG] + "0" + resultFlag[HDCP_PRG+1:]
         return 0
-
     currentProgressbarValue = 50
     app.ptc_update_msg("updatemainbar", "update HDCP key done", str(currentProgressbarValue))
     # Update UI
-
     macaddList = stbGetMacAddress(app, tel)
     ethMac = "%s" % macaddList[0]
     wifiMac = "%s" % macaddList[1]
@@ -2505,42 +2509,6 @@ def stbDumpUecCode(app,tel) :
             continue
 
 def stbPerformUiUpgrade(app,tel):
-    #check MAC
-    macaddList = stbGetMacAddress(app, tel)
-    ethMac = "%s" % macaddList[0]
-    wifiMac = "%s" % macaddList[1]
-    print ethMac
-    print wifiMac
-    defaultMAC = "00:12:22:FF:FF:00"
-    if defaultMAC in ethMac:
-        app.ptc_update_msg("updateHdcpKeyResult","FAIL","")
-        app.ptc_update_msg("updatemainbar", "MAC not change", str(24))
-        return 0
-
-    # check the HDCP key
-    hdcpKeyResponseMatchString6 = "HDCP1.4 key isn't exist"
-    hdcpKeyResponseMatchString7 = "HDCP2.2 key isn't exist"
-    #verify the Keys 1.x
-    tel.telWrite(command_list[TestCommnad.VERIFY_HDCP_1X])
-    time.sleep(1)
-    data = tel.telReadSocket(app)
-    match = re.search(hdcpKeyResponseMatchString6,data)
-    if match:
-        print "HDCP 1.x Validation Fail Please check the mac address"
-        app.ptc_update_msg("updateHdcpKeyResult","FAIL","")
-        revertMACAddress()
-        return 0
-    #verify the Keys 2.x
-    tel.telWrite(command_list[TestCommnad.VERIFY_HDCP_2X])
-    time.sleep(1)
-    data = tel.telReadSocket(app)
-    match = re.search(hdcpKeyResponseMatchString7,data)
-    if match:
-        print "HDCP 2.x Validation Fail Please check the mac address"
-        app.ptc_update_msg("updateHdcpKeyResult","FAIL","")
-        revertMACAddress()
-        return 0
-
     print "start UI Upgrade and OTP"
     changeFwConfirmationMsg = "Are you sure want to change FW to"
     changeToUECFWMatchStr = "Change firmware to UEC is successful"
@@ -2661,7 +2629,7 @@ except AttributeError:
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
     myapp = SkedYesUI()
-    myapp.setWindowTitle(_translate("SkedYes", "SKED YES V1.15", None))
+    myapp.setWindowTitle(_translate("SkedYes", "SKED YES V1.17", None))
 
     timenow = '%s' % (time.ctime(time.time()))
     myapp.ui.dateAndTime.setText(timenow)

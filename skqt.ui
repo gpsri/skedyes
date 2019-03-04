@@ -2461,7 +2461,7 @@
     <string/>
    </property>
   </widget>
-  <widget class="QRadioButton" name="autoupdateUI">
+  <widget class="QRadioButton" name="autoupdateUIhdcp">
    <property name="geometry">
     <rect>
      <x>610</x>
@@ -2476,7 +2476,7 @@
     </font>
    </property>
    <property name="text">
-    <string>Auto Update UI</string>
+    <string>Auto HDCP/Update UI</string>
    </property>
    <property name="iconSize">
     <size>
