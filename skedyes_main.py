@@ -684,18 +684,22 @@ class SkedYesUI(QtGui.QMainWindow):
                     self.ui.hdcpStartButton.setEnabled(False)
                 else:
                     self.ui.hdcpStartButton.setEnabled(True)
+                    if(self.ui.autohdcp.isChecked()):
+                        self.startHdcpKeyProgram()
+                    if(self.ui.autoupdateUIhdcp.isChecked()):
+                        self.startAutoupdateUI_hdcp()
             else :
                 if (self.readMACAddress() == False):
                     self.ui.hdcpStartButton.setEnabled(False)
                 else:
                     self.ui.hdcpStartButton.setEnabled(True)
+                    if(self.ui.autohdcp.isChecked()):
+                        self.startHdcpKeyProgram()
+                    if(self.ui.autoupdateUIhdcp.isChecked()):
+                        self.startAutoupdateUI_hdcp()
         if(self.ui.autoTestButton.isChecked()):
             #self.startHddTest()
             self.startAutoTest()
-        if(self.ui.autohdcp.isChecked()):
-            self.startHdcpKeyProgram()
-        if(self.ui.autoupdateUIhdcp.isChecked()):
-            self.startAutoupdateUI_hdcp()
 
     def generateMacList(self):
 
@@ -1621,6 +1625,66 @@ def stbStopUsbTest(app,tel):
     print("USB Test Stopped")
     tel.telWrite('\x03') #ctrl + c
 
+
+def checkL20Bytes(app, tel, check, ver):
+    macadd = myapp.ui.macAddressInputValue.text()
+    mac = str(macadd)
+    mac = mac.upper()
+    if (ver == 1):
+        hdcpKeyFilePATH  = "/tmp/HDCP/" + mac + ".14bin"
+        hdcpKeyFileLength = 1148
+    elif (ver == 2):
+        hdcpKeyFilePATH  = "/root/htp/Output/" + mac + ".22bin"
+        hdcpKeyFileLength = 1088
+    else :
+        return False
+    print "PATH:", hdcpKeyFilePATH
+
+    tel.telWrite("hexdump -s " + str(hdcpKeyFileLength-20) + " " + hdcpKeyFilePATH)
+    time.sleep(1)
+    data = tel.telReadSocket(app)
+    if data.find("No such file or directory") != -1:
+        return False
+    if (ver == 1):
+        startadd1 = "0000468"
+        startadd2 = "0000478"
+    else:
+        startadd1 = "000042c"
+        startadd2 = "000043c"
+    start1 = data.find(startadd1) + len(startadd1) + 1
+    if start1 == -1:
+        return False
+    start2 = data.find(startadd2) + len(startadd2) + 1
+    if start2 == -1:
+        return False
+
+    l20bytes = ""
+    i = 0
+    while i < 8:
+        if start1 + 3 >= len(data):
+            return False
+        lower = data[start1:start1+2]
+        higher = data[start1+2:start1+4]
+        l20bytes = l20bytes + higher + lower
+        i = i + 1
+        start1 = start1 + 4 + 1
+
+    lower = data[start2:start2+2]
+    higher = data[start2+2:start2+4]
+    l20bytes = l20bytes + higher + lower
+    start2 = start2 + 4 + 1
+    if start2 + 3 >= len(data):
+        return False
+    lower = data[start2:start2+2]
+    higher = data[start2+2:start2+4]
+    l20bytes = l20bytes + higher + lower
+    l20bytes = l20bytes.upper()
+    print "l20BYTES:", l20bytes
+    if check.find(l20bytes) != -1:
+        return True
+    else:
+        return False
+
 def stbStartAutoupdateUI_hdcp(app, tel):
     global resultFlag
     hdcpKeyResponseMatchString1 = "Get key from key server"
@@ -1710,12 +1774,26 @@ def stbStartAutoupdateUI_hdcp(app, tel):
                             revertMACAddress()
                             resultFlag = resultFlag[:HDCP_PRG] + "0" + resultFlag[HDCP_PRG+1:]
                             return 0
+                        elif checkL20Bytes(app, tel, data,1) == False:
+                            print "HDCP 1.x Validation Fail Please check the mac address"
+                            app.ptc_update_msg("updateHdcpKeyResult","FAIL","")
+                            revertMACAddress()
+                            resultFlag = resultFlag[:HDCP_PRG] + "0" + resultFlag[HDCP_PRG+1:]
+                            return 0
+
+
                         #verify the Keys 2.x
                         tel.telWrite(command_list[TestCommnad.VERIFY_HDCP_2X])
                         time.sleep(1)
                         data = tel.telReadSocket(app)
                         match = re.search(hdcpKeyResponseMatchString7,data)
                         if match:
+                            print "HDCP 2.x Validation Fail Please check the mac address"
+                            app.ptc_update_msg("updateHdcpKeyResult","FAIL","")
+                            revertMACAddress()
+                            resultFlag = resultFlag[:HDCP_PRG] + "0" + resultFlag[HDCP_PRG+1:]
+                            return 0
+                        elif checkL20Bytes(app, tel, data, 2) == False:
                             print "HDCP 2.x Validation Fail Please check the mac address"
                             app.ptc_update_msg("updateHdcpKeyResult","FAIL","")
                             revertMACAddress()
@@ -2452,6 +2530,12 @@ def stbPerformHdcpKeyProgramming(app,tel):
                             app.ptc_update_msg("updateHdcpKeyResult","FAIL","")
                             revertMACAddress()
                             return 0
+                        elif checkL20Bytes(app, tel, data,1) == False:
+                            print "HDCP 1.x Validation Fail Please check the mac address"
+                            app.ptc_update_msg("updateHdcpKeyResult","FAIL","")
+                            revertMACAddress()
+                            #resultFlag = resultFlag[:HDCP_PRG] + "0" + resultFlag[HDCP_PRG+1:]
+                            return 0
                         #verify the Keys 2.x
                         tel.telWrite(command_list[TestCommnad.VERIFY_HDCP_2X])
                         time.sleep(1)
@@ -2462,7 +2546,12 @@ def stbPerformHdcpKeyProgramming(app,tel):
                             app.ptc_update_msg("updateHdcpKeyResult","FAIL","")
                             revertMACAddress()
                             return 0
-
+                        elif checkL20Bytes(app, tel, data,2) == False:
+                            print "HDCP 2.x Validation Fail Please check the mac address"
+                            app.ptc_update_msg("updateHdcpKeyResult","FAIL","")
+                            revertMACAddress()
+                            #resultFlag = resultFlag[:HDCP_PRG] + "0" + resultFlag[HDCP_PRG+1:]
+                            return 0
                         mac = str( myapp.ui.macAddressInputValue.text())
                         mac = mac.upper()
                         filename = "mac/" + mac.upper() + ".txt"
@@ -2629,7 +2718,7 @@ except AttributeError:
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
     myapp = SkedYesUI()
-    myapp.setWindowTitle(_translate("SkedYes", "SKED YES V1.17", None))
+    myapp.setWindowTitle(_translate("SkedYes", "SKED YES V1.18", None))
 
     timenow = '%s' % (time.ctime(time.time()))
     myapp.ui.dateAndTime.setText(timenow)
