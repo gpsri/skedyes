@@ -1763,11 +1763,13 @@ def stbStartAutoupdateUI_hdcp(app, tel):
                         resultFlag = resultFlag[:HDCP_PRG] + "0" + resultFlag[HDCP_PRG+1:]
                         return 0
                     elif match:
+                        time.sleep(2) # 20190325 for delay Test
                         #verify the Keys 1.x
                         tel.telWrite(command_list[TestCommnad.VERIFY_HDCP_1X])
                         time.sleep(1)
                         data = tel.telReadSocket(app)
                         match = re.search(hdcpKeyResponseMatchString6,data)
+                        time.sleep(1) # 20190325 for delay Test
                         if match:
                             print "HDCP 1.x Validation Fail Please check the mac address"
                             app.ptc_update_msg("updateHdcpKeyResult","FAIL","")
@@ -1824,6 +1826,7 @@ def stbStartAutoupdateUI_hdcp(app, tel):
         return 0
     currentProgressbarValue = 50
     app.ptc_update_msg("updatemainbar", "update HDCP key done", str(currentProgressbarValue))
+    time.sleep(5)  # 20190325 for Delay Test
     # Update UI
     macaddList = stbGetMacAddress(app, tel)
     ethMac = "%s" % macaddList[0]
@@ -1879,7 +1882,7 @@ def stbStartAutoupdateUI_hdcp(app, tel):
                 print data
             else:
                 continue
-
+        time.sleep(2)  # 20190325 for Delay Test
         currentProgressbarValue = 100
         app.ptc_update_msg("updateUiUpgradeResult","PASS","")
         app.ptc_update_msg("updateMainProgress", "Ui upgrade done", str(currentProgressbarValue))
@@ -2520,11 +2523,13 @@ def stbPerformHdcpKeyProgramming(app,tel):
                         revertMACAddress()
                         return 0
                     elif match:
+                        time.sleep(2)  # 20190325 for Delay Test
                         #verify the Keys 1.x
                         tel.telWrite(command_list[TestCommnad.VERIFY_HDCP_1X])
                         time.sleep(1)
                         data = tel.telReadSocket(app)
                         match = re.search(hdcpKeyResponseMatchString6,data)
+                        time.sleep(1)  # 20190325 for Delay Test
                         if match:
                             print "HDCP 1.x Validation Fail Please check the mac address"
                             app.ptc_update_msg("updateHdcpKeyResult","FAIL","")
@@ -2560,6 +2565,7 @@ def stbPerformHdcpKeyProgramming(app,tel):
                         record .write(mac.upper())
                         record .close()
                         rmMACAddress()
+                        time.sleep(5)  # 20190325 for Delay Test
                         return 1
 
                     else:
@@ -2641,7 +2647,7 @@ def stbPerformUiUpgrade(app,tel):
                 print data
             else:
                 continue
-
+        time.sleep(2)  # 20190325 for Delay Test
         app.ptc_update_msg("updateUiUpgradeResult","PASS","")
         return 1
 
@@ -2718,7 +2724,7 @@ except AttributeError:
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
     myapp = SkedYesUI()
-    myapp.setWindowTitle(_translate("SkedYes", "SKED YES V1.18", None))
+    myapp.setWindowTitle(_translate("SkedYes", "SKED YES V1.19", None))
 
     timenow = '%s' % (time.ctime(time.time()))
     myapp.ui.dateAndTime.setText(timenow)
