@@ -1805,7 +1805,6 @@ def stbStartAutoupdateUI_hdcp(app, tel):
                         mac = mac.upper()
                         filename = "mac/" + mac.upper() + ".txt"
                         app.ptc_update_msg("updateHdcpKeyResult","PASS","")
-                        resultFlag = resultFlag[:HDCP_PRG] + "1" + resultFlag[HDCP_PRG+1:]
                         record = open(filename, "w")
                         record .write(mac.upper())
                         record .close()
@@ -1866,6 +1865,7 @@ def stbStartAutoupdateUI_hdcp(app, tel):
                     continue
 
         #upgradeFirmwareSuccesfull Do the OTP
+        time.sleep(2)  # 20190325 for Delay Test
         tel.telWrite(command_list[TestCommnad.SET_OTP_CMD1])
         time.sleep(1)
         data = tel.telReadSocket(app)
@@ -1886,6 +1886,7 @@ def stbStartAutoupdateUI_hdcp(app, tel):
         currentProgressbarValue = 100
         app.ptc_update_msg("updateUiUpgradeResult","PASS","")
         app.ptc_update_msg("updateMainProgress", "Ui upgrade done", str(currentProgressbarValue))
+        resultFlag = resultFlag[:HDCP_PRG] + "1" + resultFlag[HDCP_PRG+1:]
         resultFlag = resultFlag[:UI_PRG] + "1" + resultFlag[UI_PRG+1:]
         return 1
 
@@ -2631,6 +2632,7 @@ def stbPerformUiUpgrade(app,tel):
                     continue
 
         #upgradeFirmwareSuccesfull Do the OTP
+        time.sleep(2)  # 20190325 for Delay Test
         tel.telWrite(command_list[TestCommnad.SET_OTP_CMD1])
         time.sleep(1)
         data = tel.telReadSocket(app)
@@ -2724,7 +2726,7 @@ except AttributeError:
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
     myapp = SkedYesUI()
-    myapp.setWindowTitle(_translate("SkedYes", "SKED YES V1.19", None))
+    myapp.setWindowTitle(_translate("SkedYes", "SKED YES V1.20", None))
 
     timenow = '%s' % (time.ctime(time.time()))
     myapp.ui.dateAndTime.setText(timenow)
