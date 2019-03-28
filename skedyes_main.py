@@ -1857,7 +1857,7 @@ def stbStartAutoupdateUI_hdcp(app, tel):
         time.sleep(3)
         data = tel.telReadSocket(app)
         if (data != ""):
-            fp.write(data)
+            fp.write("["+time.asctime( time.localtime(time.time()) )+"]"+data)
         match = re.search(changeFwConfirmationMsg,data)
         if match :
             tel.telWrite("Y")
@@ -1866,7 +1866,7 @@ def stbStartAutoupdateUI_hdcp(app, tel):
             while waitforfind:
                 data = tel.telReadSocket(app)
                 if (data != ""):
-                    fp.write(data)
+                    fp.write("["+time.asctime( time.localtime(time.time()) )+"]"+data)
                 match = re.search(changeToUECFWMatchStr,data)
                 if match :
                     waitforfind = 0
@@ -1885,7 +1885,7 @@ def stbStartAutoupdateUI_hdcp(app, tel):
         while waitforfind:
             data = tel.telReadSocket(app)
             if (data != ""):
-                fp.write(data)
+                fp.write("["+time.asctime( time.localtime(time.time()) )+"]"+data)
             match = re.search(otpStatusMatchStr,data)
             if match :
                 waitforfind = 0
