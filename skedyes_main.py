@@ -1843,12 +1843,21 @@ def stbStartAutoupdateUI_hdcp(app, tel):
     changeFwConfirmationMsg = "Are you sure want to change FW to"
     changeToUECFWMatchStr = "Change firmware to UEC is successful"
     otpStatusMatchStr = "006 Production OTP lock "
+
+    ethMac = ethMac.replace(":", "_")
+    fp  = open("mac/"+ethMac+".log", 'w')
+    if (fp == 0):
+        print "can't create log file"
+        return 0
+
     ret = stbDumpUecCode(app,tel)
     if ret:
         print "Code dump OK - going to do the code swap"
         tel.telWrite(command_list[TestCommnad.UEC_FW_CODE_SWAP])
         time.sleep(3)
         data = tel.telReadSocket(app)
+        if (data != ""):
+            fp.write(data)
         match = re.search(changeFwConfirmationMsg,data)
         if match :
             tel.telWrite("Y")
@@ -1856,6 +1865,8 @@ def stbStartAutoupdateUI_hdcp(app, tel):
             waitforfind = 1
             while waitforfind:
                 data = tel.telReadSocket(app)
+                if (data != ""):
+                    fp.write(data)
                 match = re.search(changeToUECFWMatchStr,data)
                 if match :
                     waitforfind = 0
@@ -1863,18 +1874,18 @@ def stbStartAutoupdateUI_hdcp(app, tel):
                     print data
                 else:
                     continue
-
         #upgradeFirmwareSuccesfull Do the OTP
-        time.sleep(2)  # 20190325 for Delay Test
+        time.sleep(3)  # 20190325 for Delay Test
         tel.telWrite(command_list[TestCommnad.SET_OTP_CMD1])
-        time.sleep(1)
         data = tel.telReadSocket(app)
         tel.telWrite(command_list[TestCommnad.SET_OTP_CMD2])
-        time.sleep(1)
+        time.sleep(2)
         waitforfind = 1
         data = ""
         while waitforfind:
             data = tel.telReadSocket(app)
+            if (data != ""):
+                fp.write(data)
             match = re.search(otpStatusMatchStr,data)
             if match :
                 waitforfind = 0
@@ -1888,6 +1899,7 @@ def stbStartAutoupdateUI_hdcp(app, tel):
         app.ptc_update_msg("updateMainProgress", "Ui upgrade done", str(currentProgressbarValue))
         resultFlag = resultFlag[:HDCP_PRG] + "1" + resultFlag[HDCP_PRG+1:]
         resultFlag = resultFlag[:UI_PRG] + "1" + resultFlag[UI_PRG+1:]
+        fp.close()
         return 1
 
 
