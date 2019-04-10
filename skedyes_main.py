@@ -1518,6 +1518,12 @@ def stbPerformFanTest(app,tel):
 
         speed = data[(data.find(fanPassString)): (data.find(fanPassString)) + 15]
         print speed
+        result_speed = string.atoi(speed[len("speed: "):(speed.find(" RPM"))], 10)
+        if (result_speed < 2300 or result_speed > 4000):
+            currentProgressbarValue = 100
+            app.ptc_update_msg("updateFanTestProgress","Fan Test Failed ",str(currentProgressbarValue))
+            return 0
+
         msgStr = "FAN : " + "%s"  % speed
         print msgStr
         app.ptc_update_msg("updateFanTestSpeed", msgStr, "")
@@ -2066,18 +2072,24 @@ def stbStartAutoTest(app, tel):
     match = re.search(fanPassString,data)
     if match:
         currentProgressbarValue = 80
-
         speed = data[(data.find(fanPassString)): (data.find(fanPassString)) + 15]
         print speed
-        msgStr = "FAN : " + "%s"  % speed
-        print msgStr
-        app.ptc_update_msg("updateFanTestSpeed", msgStr, "")
-        app.ptc_update_msg("updateFanTestProgress",msgStr,str(currentProgressbarValue))
-        stbStopFanTest(app,tel)
-        currentProgressbarValue = 100
-        app.ptc_update_msg("updateFanTestProgress",msgStr,str(currentProgressbarValue))
-        app.ptc_update_msg("updateFanTestResult","PASS",'')
-        resultFlag = resultFlag[:FAN_TEST] + "1" + resultFlag[FAN_TEST+1:]
+        result_speed = string.atoi(speed[len("speed: "):(speed.find(" RPM"))], 10)
+        if (result_speed < 2300 or result_speed > 4000):
+            currentProgressbarValue = 100
+            app.ptc_update_msg("updateFanTestProgress","Fan Test Failed ",str(currentProgressbarValue))
+            app.ptc_update_msg("updateFanTestResult","FAIL",'')
+            resultFlag = resultFlag[:FAN_TEST] + "0" + resultFlag[FAN_TEST+1:]
+        else:
+            msgStr = "FAN : " + "%s"  % speed
+            print msgStr
+            app.ptc_update_msg("updateFanTestSpeed", msgStr, "")
+            app.ptc_update_msg("updateFanTestProgress",msgStr,str(currentProgressbarValue))
+            stbStopFanTest(app,tel)
+            currentProgressbarValue = 100
+            app.ptc_update_msg("updateFanTestProgress",msgStr,str(currentProgressbarValue))
+            app.ptc_update_msg("updateFanTestResult","PASS",'')
+            resultFlag = resultFlag[:FAN_TEST] + "1" + resultFlag[FAN_TEST+1:]
     else:
         currentProgressbarValue = 80
         app.ptc_update_msg("updateFanTestProgress","Fan Test Failed ",str(currentProgressbarValue))
@@ -2086,7 +2098,6 @@ def stbStartAutoTest(app, tel):
         app.ptc_update_msg("updateFanTestProgress","Fan Test Failed ",str(currentProgressbarValue))
         app.ptc_update_msg("updateFanTestResult","FAIL",'')
         resultFlag = resultFlag[:FAN_TEST] + "0" + resultFlag[FAN_TEST+1:]
-
     #VFD Test(FP)
     retry = 1
     retrycnt = 0
@@ -2111,11 +2122,10 @@ def stbStartAutoTest(app, tel):
         currentProgressbarValue = 100
         app.ptc_update_msg("updateFpTestProgress","FP Test Passed ",str(currentProgressbarValue))
         app.ptc_update_msg("updateFpTestResult","PASS",'')
-        resultFlag = resultFlag[:VFD_TEST] + "1 " + resultFlag[VFD_TEST+1:]
+        resultFlag = resultFlag[:VFD_TEST] + "1" + resultFlag[VFD_TEST+1:]
     else:
         app.ptc_update_msg("updateFpTestResult","FAIL",'')
         resultFlag = resultFlag[:VFD_TEST] + "0" + resultFlag[VFD_TEST+1:]
-
     #LED Test
     #Send Ctrl C to stop previous running tests
     tel.telWrite('\x03') #ctrl + c
@@ -2185,6 +2195,7 @@ def stbStartAutoTest(app, tel):
         app.ptc_update_msg("updateLnbTestProgress","Test Done",str(currentProgressbarValue))
         app.ptc_update_msg("updateLnbTestResult","FAIL",'')
         resultFlag = resultFlag[:LNB_TEST] + "0" + resultFlag[LNB_TEST+1:]
+
 
     #check format passed
     if not match_hddfail and not hddformatepass :
